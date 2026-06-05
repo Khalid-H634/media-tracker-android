@@ -13,9 +13,9 @@ Khalid Hassan 06-04-2026
 **Link:**
 
 ---
-Hunter Bounty and Danny Kins review. 
-https://github.com/DannyKin/media-tracker-android/pull/3/changes 
-https://github.com/Hunterbounty11/media-tracker-android/pull/3
+ Khalid Hassan
+https://github.com/Khalid-H634/media-tracker-android/pull/2/changes/ee9e1200fe1f19729edbb0a56145578cd346ec41
+
 ## Code Review
 
 <!-- Every week you leave a review on a pod mate's pull request. Fill in both parts below.
@@ -24,7 +24,11 @@ https://github.com/Hunterbounty11/media-tracker-android/pull/3
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
-https://github.com/Khalid-H634/media-tracker-android/pull/2/changes/ee9e1200fe1f19729edbb0a56145578cd346ec41
+Hunter Bounty and Danny Kins review.
+https://github.com/DannyKin/media-tracker-android/pull/3/changes
+https://github.com/Hunterbounty11/media-tracker-android/pull/3
+
+
 ### What I Looked At
 
 <!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
