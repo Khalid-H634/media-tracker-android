@@ -1,4 +1,4 @@
-# Week {{N}} Reflection
+# Week {{03}} Reflection
 
 **Name:**
 **Date:**
@@ -13,7 +13,8 @@ Khalid Hassan 06-04-2026
 **Link:**
 
 ---
-https://github.com/Hunterbounty11/media-tracker-android/pull/3 
+Hunter Bounty and Danny Kins review. 
+https://github.com/DannyKin/media-tracker-android/pull/3/changes 
 https://github.com/Hunterbounty11/media-tracker-android/pull/3
 ## Code Review
 
@@ -23,7 +24,7 @@ https://github.com/Hunterbounty11/media-tracker-android/pull/3
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
-
+https://github.com/Khalid-H634/media-tracker-android/pull/2/changes/ee9e1200fe1f19729edbb0a56145578cd346ec41
 ### What I Looked At
 
 <!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
@@ -39,14 +40,23 @@ API Service setup and UserRepository.
 <!-- Be specific. Did you spot a potential bug? A pattern that could cause problems? Something
      done well that you want to call out? "I looked at the ViewModel and everything seemed fine"
      is not specific enough. Name the thing you noticed and explain why it matters. -->
+I Notice that some errors from all of us more specifically from under registerScreen where we all have
 
+Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+Text(Collapse commentComment on line L18Khalid-H634 commented on Jun 4, 2026 Khalid-H634on Jun 4, 2026More actionsNice job, I also had this issue.ReactWrite a replyResolve comment
+text = stringResource(edu.metrostate.ics342.mediatracker.R.string.register_not_implemented),
+style = MaterialTheme.typography.bodyLarge
+
+which was show an red error when trying to run it. 
 ### Comments I Left
 
 <!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
      say what it was. If you left a suggestion, say what you suggested and why. -->
 
 ---
-I left A few comments under Danny Kings post, about the amount of import
+I left A few comments under Danny Kings and Hunters post, about the amount of imports weve added under
+RegisteredScreen. One of the things i notice is that alot of the texts except for (Smart display) image 
+shows up a red error without it. 
 ## One Thing I Understood More Deeply
 
 <!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
