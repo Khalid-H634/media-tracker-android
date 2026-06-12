@@ -1,19 +1,16 @@
 package edu.metrostate.ics342.mediatracker.data
 
 import edu.metrostate.ics342.mediatracker.data.model.CreateUserRequest
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
+import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 
 const val baseURL = "https://wjtzkgpxmxtzcczzbvrz.supabase.co/functions/v1/"
 
 class UserRepository {
     private val api: ApiService = Retrofit.Builder()
         .baseUrl(baseURL)
-        .addConverterFactory(
-            Json.asConverterFactory(
-                "application/json; charset=utf-8".toMediaType()))
+        .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiService::class.java)
 
@@ -22,15 +19,21 @@ class UserRepository {
         username: String,
         email: String,
         password: String
-    ) {
-        val createUserRequest = CreateUserRequest(
-            email = email,
-            password = password,
-            username = username,
-            displayName = displayName,
-            clientId = "",
-            clientSecret = ""
-        )
-        api.createUser(createUserRequest)
+    ): Boolean {
+        return try {
+            val createUserRequest = CreateUserRequest(
+                email = email,
+                password = password,
+                username = username,
+                displayName = displayName,
+                clientId = "",
+                clientSecret = ""
+            )
+            val response = api.createUser(createUserRequest)
+            response.id.isNotEmpty()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }
