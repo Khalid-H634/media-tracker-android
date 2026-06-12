@@ -1,4 +1,4 @@
-# Week {{N}} Reflection
+# Week {{n}} Reflection
 
 **Name:**
 **Date:**
