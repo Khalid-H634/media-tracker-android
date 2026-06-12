@@ -10,8 +10,8 @@
 
 
 **Link:**
+https://github.com/Khalid-H634/media-tracker-android/pull/3/commits
 
----
 
 ## Code Review
 
@@ -20,37 +20,44 @@
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
 
+ Hunter Bounty
+https://github.com/Hunterbounty11/media-tracker-android/pull/4/changes/18274ce1a66847379882514ae9b79060635f84e9 
+
+
+Danny King
+https://github.com/DannyKin/media-tracker-android/pull/4/changes/cc8ff3d6ecee0774144bc202519b3d62f6f1d805#r3400376865
 ### What I Looked At
 
-
+I looked at both of their RegisterScreen files and how they set up their form state.
 
 ### What I Noticed
 
-
+Hunter had all his form state in the ViewModel using collectAsState() which is organized. Danny had the right imports ready for his composable
 
 ### Comments I Left
+I let Danny know about how his imports may not have been synced well. and Hunter I just told him about his viewmodel. 
 
 
-
----
 
 ## One Thing I Understood More Deeply
+I think I get ScrollState. When the keyboard pops up, the screen refreshes and the scroll spot goes back to the top. 
+ScrollState saves that spot so you can scroll down and tap the Register button.
 
 
----
 
 ## One Thing I'm Still Confused About
 
 
-Im confused about how  RegisterScreen sends the email, password, and display name to the ViewModel. I see onRegisterSuccess but no parameters. Where does the form data go?
+I'm confused about how  RegisterScreen sends the email, password, and display name to the ViewModel.
+Also my app for some reason crashes whenever I try to click register on the emulator. I also made a separate CreateUserFile under model folder to figure out where the data goes.
     
----
+
 
 ## Anything Else *(optional)*
 
 
 
----
+
 
 ## Rubric
 
