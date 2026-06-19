@@ -1,67 +1,65 @@
-# Week {{n}} Reflection
+# Week 05 Reflection
 
-**Name:**
-**Date:**
+**Name:** Khalid Hassan
+**Date:** 06-18-2026
 
 ---
 
 ## Commits This Week
 
-<!-- Paste a link to your commits for this week. The easiest way: go to your repo on GitHub,
-     click "commits", and copy the URL after filtering by your name or branch. -->
 
-**Link:**
 
----
+**Link:** https://github.com/Khalid-H634/media-tracker-android/pull/4/commits
+
+
 
 ## Code Review
 
-<!-- Every week you leave a review on a pod mate's pull request. Fill in both parts below.
-     Part 1 is the link — I will verify the review exists on GitHub.
-     Part 2 is your written assessment — what you actually looked at and what you found. -->
+
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
 
+Hunter Bounty
+https://github.com/Hunterbounty11/media-tracker-android/pull/5 
+
+Danny King
+https://github.com/DannyKin/media-tracker-android/pull/5
+
 ### What I Looked At
 
-<!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
-     functions did you focus on? -->
+I went ahead and check on any additonal files or changes that was done to hunter and dannys code
+
 
 ### What I Noticed
 
-<!-- Be specific. Did you spot a potential bug? A pattern that could cause problems? Something
-     done well that you want to call out? "I looked at the ViewModel and everything seemed fine"
-     is not specific enough. Name the thing you noticed and explain why it matters. -->
+i noticed Hunter updated his UserRepository, which looked different from mines
+and looked at danny's retrofitInstance file and smart_display
 
 ### Comments I Left
 
-<!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
-     say what it was. If you left a suggestion, say what you suggested and why. -->
+I asked Hunter if he figured out any solution for UserRepository file. As well for Danny
+on his changes to his smart_display Icon and if he had the same issue with RetroFitInstance.kt.
 
----
 
 ## One Thing I Understood More Deeply
 
-<!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
-     what was confusing before, what made it make sense, and how you'd explain it to someone else.
-     There are no wrong answers here. -->
+I think I get how the RegisterScreen connects to the network folder, the screen calls the ViewModel,
+which calls the Repository, which makes the API call through UserApiService. Creating the network 
+folder helps keep API code organized separately from UI code.
 
----
 
 ## One Thing I'm Still Confused About
 
-<!-- Be honest. This is the most useful part of the reflection for me — it tells me where to
-     spend more time in class. You will not lose points for being confused. -->
+I'm getting Unresolved reference errors in my RetrofitInstance.kt file.
+I think the import path might be wrong. I'm also confused about the build.gradle.kts file
+what do I need there, since im seeing two of them under Gradle Script folder. 
 
----
+
 
 ## Anything Else *(optional)*
 
-<!-- Did you help a pod mate work through something? Did you discover something cool or frustrating?
-     Did something from a previous week finally click? This is a good place to put it. -->
 
----
 
 ## Rubric
 
