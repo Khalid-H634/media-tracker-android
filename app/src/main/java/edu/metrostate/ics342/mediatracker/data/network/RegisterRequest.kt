@@ -1,9 +1,9 @@
-package edu.metrostate.ics342.mediatracker.data.model
+package edu.metrostate.ics342.mediatracker.data.network
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateUserRequest(
+data class RegisterRequest(
     val email: String,
     val password: String,
     val username: String,
