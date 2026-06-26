@@ -54,14 +54,15 @@ filter logic to applyFilter().
 
 ## One Thing I Understood More Deeply
 
+
 I understood how the search flow works. The SearchScreen collects the user's query and selected 
 type, then navigates to SearchResultsScreen with the query as a parameter. The SearchResultsScreen 
 then calls the MediaApiService with the query and type to get real results from the API.
 
-I also learned why LazyColumn is needed for displaying search results. When testing with fake 
-data, Column with verticalScroll rendered every item at once and became sluggish with many results. 
-LazyColumn only renders visible items and reuses views as you scroll, which keeps performance 
-smooth even with large result sets.
+The difference between Column with verticalScroll and LazyColumn clicked this week. When 
+testing with fake data, Column rendered every item at once and became sluggish with many results. 
+LazyColumn only renders visible items and reuses views as you scroll, which keeps performance smooth
+even with large result sets.
 
 
 
@@ -78,7 +79,7 @@ actual error is.
 ## Anything Else *(optional)*
 
 I resolved the LoginResult import errors, but I'm still getting a "Something went wrong" error when
-registering, so theres likely be another issue
+registering, so there's likely be another issue
 
 
 
