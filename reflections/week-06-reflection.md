@@ -1,67 +1,86 @@
-# Week {{n}} Reflection
+# Week 06 Reflection
 
-**Name:**
-**Date:**
+**Name:** Khalid Hassan
+**Date:** 06-25-2026
 
 ---
 
 ## Commits This Week
 
-<!-- Paste a link to your commits for this week. The easiest way: go to your repo on GitHub,
-     click "commits", and copy the URL after filtering by your name or branch. -->
 
-**Link:**
+**Link:** https://github.com/Khalid-H634/media-tracker-android/pull/5
 
----
+
 
 ## Code Review
 
-<!-- Every week you leave a review on a pod mate's pull request. Fill in both parts below.
-     Part 1 is the link — I will verify the review exists on GitHub.
-     Part 2 is your written assessment — what you actually looked at and what you found. -->
 
-**Reviewed:** *(pod mate's name)*
+
+**Reviewed:** *(pod mate's name)* 
 **Link to my review:**
+
+Hunter Bounty
+https://github.com/Hunterbounty11/media-tracker-android/pull/6
+
+Danny King
+https://github.com/DannyKin/media-tracker-android/pull/6
 
 ### What I Looked At
 
-<!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
-     functions did you focus on? -->
+Hunter: I looked at his networking setup, ApiConstants.kt, RetrofitInstance.kt and LoginRequest.kt. 
+To see how he configured his API client compared to mine.
+
+Danny: I looked at his SearchScreen.kt and SearchResultsViewModel.kt
+to see how he implemented search functionality.
 
 ### What I Noticed
 
-<!-- Be specific. Did you spot a potential bug? A pattern that could cause problems? Something
-     done well that you want to call out? "I looked at the ViewModel and everything seemed fine"
-     is not specific enough. Name the thing you noticed and explain why it matters. -->
+For Hunter's ApiConstants.kt lines 6-7, he uses BuildConfig for client credentials instead of 
+hardcoding them, which is more secure. In RetrofitInstance.kt lines 12-14, he uses 
+ignoreUnknownKeys = true to prevent crashes if the API adds new fields. In LoginRequest.kt line 6, 
+he sets grantType = "password" as a default value.
+
+In Danny's SearchScreen.kt lines 64-84, he uses Column with verticalScroll to display search 
+results, which renders all items at once and causes performance issues with larger lists. In 
+SearchResultsViewModel.kt lines 19-20, his applyFilter() function sets _results. value =
+fakeSearchResults without actually filtering by query or type.
 
 ### Comments I Left
+For Hunter, I pointed out his good practices with BuildConfig, ignoreUnknownKeys, and the default 
+grantType, and asked follow-up questions. For Danny, I suggested switching to LazyColumn and adding
+filter logic to applyFilter().
 
-<!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
-     say what it was. If you left a suggestion, say what you suggested and why. -->
 
----
 
 ## One Thing I Understood More Deeply
 
-<!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
-     what was confusing before, what made it make sense, and how you'd explain it to someone else.
-     There are no wrong answers here. -->
+I understood how the search flow works. The SearchScreen collects the user's query and selected 
+type, then navigates to SearchResultsScreen with the query as a parameter. The SearchResultsScreen 
+then calls the MediaApiService with the query and type to get real results from the API.
 
----
+I also learned why LazyColumn is needed for displaying search results. When testing with fake 
+data, Column with verticalScroll rendered every item at once and became sluggish with many results. 
+LazyColumn only renders visible items and reuses views as you scroll, which keeps performance 
+smooth even with large result sets.
+
+
+
 
 ## One Thing I'm Still Confused About
 
-<!-- Be honest. This is the most useful part of the reflection for me — it tells me where to
-     spend more time in class. You will not lose points for being confused. -->
+I'm still confused about why I keep getting "Something went wrong" when trying to register a 
+new account. I'm not sure if the issue is with my ApiConstants.kt credentials, my RegisterViewModel,
+or something else in the network setup. I've checked Logcat but I'm still not sure what the 
+actual error is.
 
----
+
 
 ## Anything Else *(optional)*
 
-<!-- Did you help a pod mate work through something? Did you discover something cool or frustrating?
-     Did something from a previous week finally click? This is a good place to put it. -->
+I resolved the LoginResult import errors, but I'm still getting a "Something went wrong" error when
+registering, so theres likely be another issue
 
----
+
 
 ## Rubric
 
