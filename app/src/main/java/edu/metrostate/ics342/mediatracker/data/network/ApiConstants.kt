@@ -1,10 +1,9 @@
 package edu.metrostate.ics342.mediatracker.data.network
 
-
+import edu.metrostate.ics342.mediatracker.BuildConfig
 
 object ApiConstants {
     const val BASE_URL = "https://wjtzkgpxmxtzcczzbvrz.supabase.co/functions/v1/"
-    const val CLIENT_ID = "your-client-id-here"  // Hardcode for now
-    const val CLIENT_SECRET = "your-client-secret-here"  // Hardcode for now
-    const val TIMEOUT_SECONDS = 30L
+    val CLIENT_ID: String = BuildConfig.API_CLIENT_ID
+    val CLIENT_SECRET: String = BuildConfig.API_CLIENT_SECRET
 }
