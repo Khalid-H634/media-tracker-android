@@ -2,6 +2,7 @@ package edu.metrostate.ics342.mediatracker.ui.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -30,15 +31,15 @@ fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     viewModel: RegisterViewModel = viewModel()
 ) {
-    val displayName     by viewModel.displayName.collectAsState()
-    val email           by viewModel.email.collectAsState()
-    val username        by viewModel.username.collectAsState()
-    val password        by viewModel.password.collectAsState()
+    val displayName by viewModel.displayName.collectAsState()
+    val email by viewModel.email.collectAsState()
+    val username by viewModel.username.collectAsState()
+    val password by viewModel.password.collectAsState()
     val confirmPassword by viewModel.confirmPassword.collectAsState()
-    val registerState   by viewModel.registerState.collectAsState()
+    val registerState by viewModel.registerState.collectAsState()
 
     val focusManager = LocalFocusManager.current
-    val scrollState  = rememberScrollState()
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(registerState) {
         if (registerState is RegisterViewModel.RegisterUiState.Success) {
@@ -48,7 +49,7 @@ fun RegisterScreen(
     }
 
     val isLoading = registerState is RegisterViewModel.RegisterUiState.Loading
-    val errorMsg  = (registerState as? RegisterViewModel.RegisterUiState.Error)
+    val errorMsg = (registerState as? RegisterViewModel.RegisterUiState.Error)
         ?.msgResId?.let { stringResource(it) }
 
     Column(
@@ -60,10 +61,10 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector        = Icons.Filled.SmartDisplay,
+            imageVector = Icons.Filled.SmartDisplay,
             contentDescription = null,
-            tint               = MaterialTheme.colorScheme.primary,
-            modifier           = Modifier.size(48.dp)
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
         )
 
         Spacer(Modifier.height(8.dp))
@@ -78,21 +79,26 @@ fun RegisterScreen(
 
         Text(
             stringResource(R.string.register_tagline),
-            style     = MaterialTheme.typography.titleMedium,
-            color     = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
         Spacer(Modifier.height(40.dp))
 
+        // Display Name
         OutlinedTextField(
-            value         = displayName,
+            value = displayName,
             onValueChange = viewModel::onDisplayNameChange,
-            label         = { Text(stringResource(R.string.display_name_label)) },
-            singleLine    = true,
+            label = { Text(stringResource(R.string.display_name_label)) },
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
-                imeAction    = ImeAction.Next
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -102,14 +108,19 @@ fun RegisterScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        // Email
         OutlinedTextField(
-            value         = email,
+            value = email,
             onValueChange = viewModel::onEmailChange,
-            label         = { Text(stringResource(R.string.email_label)) },
-            singleLine    = true,
+            label = { Text(stringResource(R.string.email_label)) },
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
-                imeAction    = ImeAction.Next
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -119,14 +130,19 @@ fun RegisterScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        // Username
         OutlinedTextField(
-            value         = username,
+            value = username,
             onValueChange = viewModel::onUsernameChange,
-            label         = { Text(stringResource(R.string.username_label)) },
-            singleLine    = true,
+            label = { Text(stringResource(R.string.username_label)) },
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
-                imeAction    = ImeAction.Next
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -136,15 +152,20 @@ fun RegisterScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        // Password
         OutlinedTextField(
-            value                = password,
-            onValueChange        = viewModel::onPasswordChange,
-            label                = { Text(stringResource(R.string.password_label)) },
-            singleLine           = true,
+            value = password,
+            onValueChange = viewModel::onPasswordChange,
+            label = { Text(stringResource(R.string.password_label)) },
+            singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
-                imeAction    = ImeAction.Next
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -154,15 +175,20 @@ fun RegisterScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        // Confirm Password
         OutlinedTextField(
-            value                = confirmPassword,
-            onValueChange        = viewModel::onConfirmPasswordChange,
-            label                = { Text(stringResource(R.string.confirm_password_label)) },
-            singleLine           = true,
+            value = confirmPassword,
+            onValueChange = viewModel::onConfirmPasswordChange,
+            label = { Text(stringResource(R.string.confirm_password_label)) },
+            singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
-                imeAction    = ImeAction.Done
+                imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
                 onDone = { focusManager.clearFocus(); viewModel.onRegisterClick() }
@@ -182,17 +208,18 @@ fun RegisterScreen(
         Spacer(Modifier.height(24.dp))
 
         Button(
-            onClick  = { focusManager.clearFocus(); viewModel.onRegisterClick() },
-            enabled  = !isLoading,
+            onClick = { focusManager.clearFocus(); viewModel.onRegisterClick() },
+            enabled = !isLoading,
+            shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
-                    modifier    = Modifier.size(20.dp),
+                    modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp,
-                    color       = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
                 Text(stringResource(R.string.sign_up_button))
