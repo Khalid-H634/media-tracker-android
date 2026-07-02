@@ -19,9 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import edu.metrostate.ics342.mediatracker.R
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
+import edu.metrostate.ics342.mediatracker.ui.components.StatusBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,14 +31,14 @@ fun LibraryScreen(
     onMediaClick: (Int) -> Unit,
     viewModel: LibraryViewModel = viewModel()
 ) {
-    val items     by viewModel.libraryItems.collectAsState()
+    val items by viewModel.libraryItems.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     var selectedStatus by remember { mutableStateOf(LibraryStatus.WANT_TO) }
-    var selectedType   by remember { mutableStateOf("all") }
+    var selectedType by remember { mutableStateOf("all") }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.library_title)) })
+        TopAppBar(title = { Text(stringResource(R.string.library_title)) })
 
         Row(
             modifier = Modifier
@@ -45,16 +47,23 @@ fun LibraryScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf(
-                "all"   to edu.metrostate.ics342.mediatracker.R.string.filter_all,
-                "book"  to edu.metrostate.ics342.mediatracker.R.string.filter_books,
-                "movie" to edu.metrostate.ics342.mediatracker.R.string.filter_movies,
-                "show"  to edu.metrostate.ics342.mediatracker.R.string.filter_shows
+                "all" to R.string.filter_all,
+                "book" to R.string.filter_books,
+                "movie" to R.string.filter_movies,
+                "show" to R.string.filter_shows
             )
                 .forEach { (key, labelRes) ->
                     FilterChip(
                         selected = selectedType == key,
-                        onClick  = { selectedType = key },
-                        label    = { Text(stringResource(labelRes)) }
+                        onClick = { selectedType = key },
+                        label = { Text(stringResource(labelRes)) },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = if (selectedType == key)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surface
+                        )
                     )
                 }
         }
@@ -66,11 +75,12 @@ fun LibraryScreen(
         ) {
             LibraryStatus.values().forEachIndexed { index, status ->
                 SegmentedButton(
-                    shape    = SegmentedButtonDefaults.itemShape(
-                        index = index, count = LibraryStatus.values().size),
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index, count = LibraryStatus.values().size
+                    ),
                     selected = selectedStatus == status,
-                    onClick  = { selectedStatus = status },
-                    label    = { Text(stringResource(status.labelRes)) }
+                    onClick = { selectedStatus = status },
+                    label = { Text(stringResource(status.labelRes)) }
                 )
             }
         }
@@ -94,7 +104,7 @@ fun LibraryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    stringResource(edu.metrostate.ics342.mediatracker.R.string.library_empty),
+                    stringResource(R.string.library_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -104,11 +114,11 @@ fun LibraryScreen(
         }
 
         Text(
-            if (filteredItems.size == 1) stringResource(edu.metrostate.ics342.mediatracker.R.string.library_item_count, filteredItems.size)
-            else stringResource(edu.metrostate.ics342.mediatracker.R.string.library_items_count, filteredItems.size),
+            if (filteredItems.size == 1) stringResource(R.string.library_item_count, filteredItems.size)
+            else stringResource(R.string.library_items_count, filteredItems.size),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            style    = MaterialTheme.typography.labelMedium,
-            color    = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         LazyColumn(
@@ -117,9 +127,9 @@ fun LibraryScreen(
         ) {
             items(filteredItems, key = { it.mediaId }) { item ->
                 LibraryItemCard(
-                    item           = item,
-                    onClick        = { onMediaClick(item.mediaId) },
-                    onRemove       = { viewModel.removeItem(item.mediaId) },
+                    item = item,
+                    onClick = { onMediaClick(item.mediaId) },
+                    onRemove = { viewModel.removeItem(item.mediaId) },
                     onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) }
                 )
             }
@@ -140,12 +150,12 @@ private fun LibraryItemCard(
     if (statusDialogVisible) {
         AlertDialog(
             onDismissRequest = { statusDialogVisible = false },
-            title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_change_status)) },
+            title = { Text(stringResource(R.string.action_change_status)) },
             text = {
                 Column {
                     LibraryStatus.values().forEach { s ->
                         TextButton(
-                            onClick  = { onStatusChange(s); statusDialogVisible = false },
+                            onClick = { onStatusChange(s); statusDialogVisible = false },
                             modifier = Modifier.fillMaxWidth()
                         ) { Text(stringResource(s.labelRes)) }
                     }
@@ -153,15 +163,17 @@ private fun LibraryItemCard(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { statusDialogVisible = false }) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_cancel_button)) }
+                TextButton(onClick = { statusDialogVisible = false }) {
+                    Text(stringResource(R.string.settings_cancel_button))
+                }
             }
         )
     }
 
     Card(
-        modifier  = Modifier.fillMaxWidth().clickable { onClick() },
-        shape     = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -172,19 +184,26 @@ private fun LibraryItemCard(
             ) {
                 if (item.media.coverUrl != null) {
                     AsyncImage(
-                        model             = item.media.coverUrl,
+                        model = item.media.coverUrl,
                         contentDescription = item.media.title,
-                        contentScale      = ContentScale.Crop,
-                        modifier          = Modifier.fillMaxSize()
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    Surface(color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.fillMaxSize()) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text(when (item.media.mediaType) {
-                                "book" -> "📖"; "movie" -> "🎬"; "show" -> "📺"
-                                else -> "?"
-                            }, style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                when (item.media.mediaType) {
+                                    "book" -> "📖"
+                                    "movie" -> "🎬"
+                                    "show" -> "📺"
+                                    else -> "?"
+                                },
+                                style = MaterialTheme.typography.titleLarge
+                            )
                         }
                     }
                 }
@@ -193,35 +212,46 @@ private fun LibraryItemCard(
             Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.media.title, style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold, maxLines = 2)
+                Text(
+                    item.media.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2
+                )
                 Spacer(Modifier.height(2.dp))
-                Text(item.media.creatorCredit(LocalContext.current),
+                Text(
+                    item.media.creatorCredit(LocalContext.current),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(Modifier.height(6.dp))
-                SuggestionChip(
-                    onClick = { statusDialogVisible = true },
-                    label   = { Text(stringResource(item.status.labelRes),
-                        style = MaterialTheme.typography.labelSmall) }
+
+                // StatusBadge - clickable to change status
+                StatusBadge(
+                    status = item.status,
+                    modifier = Modifier.clickable { statusDialogVisible = true }
                 )
             }
 
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Outlined.MoreVert, stringResource(edu.metrostate.ics342.mediatracker.R.string.action_more_options))
+                    Icon(Icons.Outlined.MoreVert, stringResource(R.string.action_more_options))
                 }
                 DropdownMenu(
-                    expanded         = menuExpanded,
+                    expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text    = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_change_status)) },
+                        text = { Text(stringResource(R.string.action_change_status)) },
                         onClick = { menuExpanded = false; statusDialogVisible = true }
                     )
                     DropdownMenuItem(
-                        text    = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_remove_from_library),
-                            color = MaterialTheme.colorScheme.error) },
+                        text = {
+                            Text(
+                                stringResource(R.string.action_remove_from_library),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
                         onClick = { menuExpanded = false; onRemove() }
                     )
                 }
