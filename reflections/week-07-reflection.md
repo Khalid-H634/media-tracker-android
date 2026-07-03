@@ -89,7 +89,7 @@ screen or if I'm supposed to use SearchScreen instead. The error also says "Cann
 value parameter mediald which looks like a typo where 'mediaId' is misspelled with 
 a lowercase l instead of an i.
 
-'m also confused about how to handle the stat grid for different media types. Books should show
+I'm also confused about how to handle the stat grid for different media types. Books should show
 page count, movies should show runtime, and shows should show season/episode count. But my Media
 model only has publishedYear and genres right now. I don't have pageCount, runtime, seasonCount, 
 or episodeCount fields. I'm not sure if the API will return these fields
