@@ -2,17 +2,17 @@ package edu.metrostate.ics342.mediatracker.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarHalf
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,20 +21,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.R
-import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
-import edu.metrostate.ics342.mediatracker.data.model.Media
+import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
 import edu.metrostate.ics342.mediatracker.data.model.Review
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
-import java.text.SimpleDateFormat
-import java.util.*
+import edu.metrostate.ics342.mediatracker.theme.MovieContainer
+import edu.metrostate.ics342.mediatracker.theme.OnMovieContainer
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,208 +44,383 @@ fun MediaDetailScreen(
     onWriteReview: (Int) -> Unit,
     viewModel: MediaDetailViewModel = viewModel()
 ) {
-    LaunchedEffect(mediaId) { viewModel.setMediaId(mediaId) }
-    val media by viewModel.media.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val state = uiState
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Filled.MoreVert, stringResource(R.string.action_more_options))
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        if (media == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+    LaunchedEffect(mediaId) {
+        viewModel.setMediaId(mediaId)
+    }
+
+    when (state) {
+        is MediaDetailViewModel.MediaDetailUiState.Loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            return@Scaffold
         }
+        is MediaDetailViewModel.MediaDetailUiState.Error -> {
+            Column(
+                Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("Error: ${state.message}")
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = { viewModel.refresh() }) {
+                    Text("Retry")
+                }
+            }
+        }
+        is MediaDetailViewModel.MediaDetailUiState.Success -> {
+            MediaDetailContent(
+                detail = state.media,
+                reviews = state.reviews,
+                onNavigateBack = onNavigateBack,
+                onWriteReview = onWriteReview
+            )
+        }
+    }
+}
 
-        val reviews = getHardcodedReviews(mediaId)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MediaDetailContent(
+    detail: MediaDetail,
+    reviews: List<Review>,
+    onNavigateBack: () -> Unit,
+    onWriteReview: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = {},
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = stringResource(R.string.action_back)
+                    )
+                }
+            },
+            actions = {
+                IconButton(onClick = { /* TODO: overflow menu */ }) {
+                    Icon(
+                        Icons.Outlined.MoreVert,
+                        contentDescription = stringResource(R.string.action_more_options)
+                    )
+                }
+            }
+        )
 
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
-            item {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                MediaCover(detail)
+
+                Spacer(Modifier.height(14.dp))
+
+                Text(
+                    text = detail.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = detail.creatorCredit(LocalContext.current),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(8.dp))
+                RatingSummary(
+                    averageRating = detail.averageRating,
+                    ratingCount = detail.ratingCount
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Button(
+                    onClick = { /* TODO: add to library */ },
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = when (media!!.mediaType) { "book" -> "📖" "movie" -> "🎬" "show" -> "📺" else -> "?" },
-                        fontSize = 64.sp
+                    Text(stringResource(R.string.detail_add_want_to))
+                }
+                OutlinedButton(
+                    onClick = { /* TODO: save */ },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        Icons.Outlined.FavoriteBorder,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
                     )
-                    Box(
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(12.dp)
-                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
-                    ) {
-                        Text(media.mediaType.replaceFirstChar { it.uppercase() }, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                    }
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.detail_save))
                 }
             }
 
-            item {
-                Column {
-                    Text(media!!.title, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                    Text(media.creatorCredit(LocalContext.current), fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(20.dp))
+
+            if (!detail.description.isNullOrBlank()) {
+                SectionCaption(stringResource(R.string.detail_about))
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = detail.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(20.dp))
+            }
+
+            StatGrid(detail)
+
+            Spacer(Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SectionCaption(
+                    text = stringResource(R.string.detail_reviews_count, detail.reviewCount),
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(onClick = { onWriteReview(detail.id) }) {
+                    Text(stringResource(R.string.detail_write_review))
                 }
             }
 
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    repeat(5) { index ->
-                        Icon(
-                            when {
-                                index < media!!.averageRating.toInt() -> Icons.Filled.Star
-                                index < media.averageRating -> Icons.Filled.StarHalf
-                                else -> Icons.Outlined.Star
-                            },
-                            null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Text(" ${String.format("%.1f", media.averageRating)}", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                    Text(" (${media.ratingCount})", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(4.dp))
+
+            if (reviews.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.detail_no_reviews),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            } else {
+                reviews.forEach { review ->
+                    ReviewCard(review)
+                    Spacer(Modifier.height(10.dp))
                 }
             }
+        }
+    }
+}
 
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button({}, Modifier.weight(1f), RoundedCornerShape(8.dp)) { Text("+ Want To") }
-                    OutlinedButton({}, Modifier.weight(1f), RoundedCornerShape(8.dp)) {
-                        Icon(Icons.Filled.FavoriteBorder, null, Modifier.size(20.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Save")
-                    }
-                }
+@Composable
+private fun MediaCover(detail: MediaDetail) {
+    val containerColor = when (detail.mediaType) {
+        "book" -> MaterialTheme.colorScheme.primaryContainer
+        "movie" -> MovieContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+
+    Box(
+        modifier = Modifier
+            .size(width = 110.dp, height = 160.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(containerColor),
+        contentAlignment = Alignment.Center
+    ) {
+        if (detail.coverUrl != null) {
+            AsyncImage(
+                model = detail.coverUrl,
+                contentDescription = detail.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Text(
+                text = when (detail.mediaType) {
+                    "book" -> "📖"
+                    "movie" -> "🎬"
+                    else -> "📺"
+                },
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+    }
+}
+
+@Composable
+private fun RatingSummary(averageRating: Float, ratingCount: Int) {
+    if (ratingCount <= 0) {
+        Text(
+            text = stringResource(R.string.detail_not_yet_rated),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        return
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        StarRow(rating = averageRating)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = "%.1f".format(averageRating),
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.secondary
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = "(${"%,d".format(ratingCount)})",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun StarRow(rating: Float, starSize: Int = 16) {
+    val rounded = (rating * 2).roundToInt()
+    Row {
+        for (i in 1..5) {
+            val icon = when {
+                rounded >= i * 2 -> Icons.Filled.Star
+                rounded == i * 2 - 1 -> Icons.Outlined.StarHalf
+                else -> Icons.Outlined.StarBorder
             }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(starSize.dp),
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
+}
 
-            item {
-                Column {
-                    Text("About", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(media!!.description ?: "No description.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+@Composable
+private fun StatGrid(detail: MediaDetail) {
+    val stats = buildList {
+        detail.publishedYear?.let { add(stringResource(R.string.detail_stat_year) to it.toString()) }
+        when (detail.mediaType) {
+            "book" -> detail.pageCount?.let {
+                add(stringResource(R.string.detail_stat_pages) to it.toString())
             }
-
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatBox("Year", media!!.publishedYear?.toString() ?: "N/A", Modifier.weight(1f))
-                    StatBox(getStatLabel(media), getStatValue(media), Modifier.weight(1f))
-                    StatBox("Genre", media.genres.firstOrNull() ?: "N/A", Modifier.weight(1f))
-                }
+            "movie" -> detail.runtimeMinutes?.let {
+                add(stringResource(R.string.detail_stat_runtime) to stringResource(R.string.detail_runtime_minutes, it))
             }
-
-            item {
-                Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Reviews (${reviews.size})", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    TextButton({ onWriteReview(mediaId) }) { Text("+ Write Review") }
-                }
+            "show" -> detail.seasonCount?.let {
+                add(stringResource(R.string.detail_stat_seasons) to it.toString())
             }
+        }
+        detail.genres.firstOrNull()?.let {
+            add(stringResource(R.string.detail_stat_genre) to it)
+        }
+    }
 
-            items(reviews) { review ->
-                ReviewCard(review)
-            }
-
-            item { Spacer(Modifier.height(16.dp)) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        stats.forEach { (label, value) ->
+            StatBox(label = label, value = value, modifier = Modifier.weight(1f))
         }
     }
 }
 
 @Composable
 private fun StatBox(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
+            )
+        }
     }
+}
+
+@Composable
+private fun SectionCaption(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
+    )
 }
 
 @Composable
 private fun ReviewCard(review: Review) {
     Card(
-        Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(review.user?.displayName?.firstOrNull()?.toString()?.uppercase() ?: "?", fontWeight = FontWeight.Bold)
-                }
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(review.user?.displayName ?: "Unknown", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    Text(formatTimestamp(review.createdAt), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    repeat(5) { index ->
-                        Icon(
-                            if (index < review.rating) Icons.Filled.Star else Icons.Outlined.Star,
-                            null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+        Row(modifier = Modifier.padding(16.dp)) {
+            val displayName = review.user?.displayName ?: "?"
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = displayName.firstOrNull()?.uppercase() ?: "?",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
-            if (!review.reviewText.isNullOrBlank()) {
-                Text(review.reviewText, fontSize = 14.sp, lineHeight = 20.sp)
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = review.user?.username?.let { "@$it" } ?: displayName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = review.createdAt.take(10),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                StarRow(rating = review.rating.toFloat(), starSize = 14)
+                if (!review.reviewText.isNullOrBlank()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = review.reviewText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
 }
-
-private fun getStatLabel(media: Media) = when (media.mediaType) {
-    "book" -> "Pages"
-    "movie" -> "Runtime"
-    "show" -> "Episodes"
-    else -> "Detail"
-}
-
-private fun getStatValue(media: Media) = "N/A"
-
-private fun formatTimestamp(timestamp: String): String {
-    return try {
-        val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-        val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).parse(timestamp)
-        date?.let { sdf.format(it) } ?: timestamp
-    } catch (e: Exception) { timestamp }
-}
-
-private fun getHardcodedReviews(mediaId: Int) = listOf(
-    Review("user-001", mediaId, 5, "Absolutely loved this! Highly recommend!", "2024-01-15T10:30:00Z", FakeMediaRepository.currentUser),
-    Review("user-002", mediaId, 4, "Really enjoyed it, though pacing was a bit slow.", "2024-01-18T14:20:00Z", FakeMediaRepository.followers.firstOrNull()),
-    Review("user-003", mediaId, 3, "Good but not great. Fell short in some areas.", "2024-01-20T09:15:00Z", FakeMediaRepository.following.firstOrNull())
-)

@@ -5,7 +5,7 @@ import edu.metrostate.ics342.mediatracker.R
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Media(
+data class MediaDetail(
     val id: Int,
     val mediaType: String,
     val title: String,
@@ -18,10 +18,16 @@ data class Media(
     val averageRating: Float = 0f,
     val ratingCount: Int = 0,
     val genres: List<String> = emptyList(),
-    val description: String? = null
+    val description: String? = null,
+    val pageCount: Int? = null,
+    val runtimeMinutes: Int? = null,
+    val seasonCount: Int? = null,
+    val episodeCount: Int? = null,
+    val isbn: String? = null,
+    val reviewCount: Int = 0
 )
 
-fun Media.creatorCredit(context: Context): String = when (mediaType) {
+fun MediaDetail.creatorCredit(context: Context): String = when (mediaType) {
     "book" -> author ?: context.getString(R.string.media_unknown_author)
     "movie" -> director ?: context.getString(R.string.media_unknown_director)
     "show" -> creator ?: context.getString(R.string.media_unknown_creator)

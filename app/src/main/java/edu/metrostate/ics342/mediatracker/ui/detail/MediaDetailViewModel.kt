@@ -3,7 +3,7 @@ package edu.metrostate.ics342.mediatracker.ui.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
-import edu.metrostate.ics342.mediatracker.data.model.Media
+import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
 import edu.metrostate.ics342.mediatracker.data.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +12,9 @@ import kotlinx.coroutines.launch
 
 class MediaDetailViewModel : ViewModel() {
 
-
     sealed class MediaDetailUiState {
         data object Loading : MediaDetailUiState()
-        data class Success(val media: Media, val reviews: List<Review> = emptyList()) : MediaDetailUiState()
+        data class Success(val media: MediaDetail, val reviews: List<Review> = emptyList()) : MediaDetailUiState()
         data class Error(val message: String) : MediaDetailUiState()
     }
 
@@ -34,15 +33,36 @@ class MediaDetailViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = MediaDetailUiState.Loading
 
+            // Using fake data - this will be replaced with API calls in Week 8
+            val media = FakeMediaRepository.sampleMediaDetail
 
-            val media = FakeMediaRepository.mediaList.find { it.id == mediaId }
-
-            if (media != null) {
-
+            if (media.id == mediaId || mediaId == 1080) {
                 val reviews = getFakeReviews(mediaId)
                 _uiState.value = MediaDetailUiState.Success(media, reviews)
             } else {
-                _uiState.value = MediaDetailUiState.Error("Media not found")
+                // Try to find in mediaList
+                val found = FakeMediaRepository.mediaList.find { it.id == mediaId }
+                if (found != null) {
+                    val detail = MediaDetail(
+                        id = found.id,
+                        mediaType = found.mediaType,
+                        title = found.title,
+                        author = found.author,
+                        director = found.director,
+                        creator = found.creator,
+                        network = found.network,
+                        coverUrl = found.coverUrl,
+                        publishedYear = found.publishedYear,
+                        averageRating = found.averageRating,
+                        ratingCount = found.ratingCount,
+                        genres = found.genres,
+                        description = "No description available.",
+                        reviewCount = 0
+                    )
+                    _uiState.value = MediaDetailUiState.Success(detail, emptyList())
+                } else {
+                    _uiState.value = MediaDetailUiState.Error("Media not found")
+                }
             }
         }
     }
@@ -53,7 +73,7 @@ class MediaDetailViewModel : ViewModel() {
                 userId = "user-001",
                 mediaId = mediaId,
                 rating = 5,
-                reviewText = "Absolutely loved this! The writing was incredible and the plot kept me on the edge of my seat. Highly recommend to anyone looking for their next favorite.",
+                reviewText = "Absolutely loved this!",
                 createdAt = "2024-01-15T10:30:00Z",
                 user = FakeMediaRepository.currentUser
             ),
@@ -61,17 +81,9 @@ class MediaDetailViewModel : ViewModel() {
                 userId = "user-002",
                 mediaId = mediaId,
                 rating = 4,
-                reviewText = "Really enjoyed this, though the pacing felt a bit slow in the middle. Overall a fantastic experience with a satisfying conclusion.",
+                reviewText = "Really enjoyed this.",
                 createdAt = "2024-01-18T14:20:00Z",
                 user = FakeMediaRepository.followers.firstOrNull()
-            ),
-            Review(
-                userId = "user-003",
-                mediaId = mediaId,
-                rating = 3,
-                reviewText = "Good but not great. Had high expectations and while it delivered on some fronts, it fell short in others. Still worth a look.",
-                createdAt = "2024-01-20T09:15:00Z",
-                user = FakeMediaRepository.following.firstOrNull()
             )
         )
     }

@@ -44,7 +44,8 @@ fun MediaTypeFilterChips(
             FilterChip(
                 selected = selectedType == type,
                 onClick = { onTypeSelect(type) },
-                label = { Text(stringResource(labelRes)) }
+                label = { Text(stringResource(labelRes)) },
+                shape = RoundedCornerShape(8.dp)
             )
         }
     }
@@ -61,9 +62,9 @@ fun MediaResultCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -87,15 +88,15 @@ fun MediaResultCard(
                     .background(containerColor),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(when (media.mediaType) {
-                        "book"  -> R.drawable.menu_book_24px
-                        "movie" -> R.drawable.movie_24px
-                        else    -> R.drawable.tv_24px
-                    }),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = iconTint
+                // Use emojis instead of drawables
+                Text(
+                    text = when (media.mediaType) {
+                        "book" -> "📖"
+                        "movie" -> "🎬"
+                        "show" -> "📺"
+                        else -> "?"
+                    },
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
 

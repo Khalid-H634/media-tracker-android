@@ -26,28 +26,26 @@ class ProfileViewModel : ViewModel() {
     val editBio: StateFlow<String> = _editBio.asStateFlow()
 
     init {
-        _currentUser.value   = FakeMediaRepository.currentUser
+        _currentUser.value = FakeMediaRepository.currentUser
         _libraryPreview.value = FakeMediaRepository.libraryItems.take(6)
         _editDisplayName.value = FakeMediaRepository.currentUser.displayName
-        _editUsername.value    = FakeMediaRepository.currentUser.username
-        _editBio.value         = FakeMediaRepository.currentUser.bio ?: ""
+        _editUsername.value = FakeMediaRepository.currentUser.username
+        _editBio.value = FakeMediaRepository.currentUser.bio ?: ""
     }
 
     fun onEditDisplayNameChange(value: String) { _editDisplayName.value = value }
-    fun onEditUsernameChange(value: String)    { _editUsername.value    = value }
-    fun onEditBioChange(value: String)          { _editBio.value        = value }
+    fun onEditUsernameChange(value: String) { _editUsername.value = value }
+    fun onEditBioChange(value: String) { _editBio.value = value }
 
     fun saveProfile() {
-        // TODO (Week 10): Call PUT /users/me with Retrofit
         _currentUser.value = _currentUser.value?.copy(
             displayName = _editDisplayName.value,
-            username    = _editUsername.value,
-            bio         = _editBio.value.ifBlank { null }
+            username = _editUsername.value,
+            bio = _editBio.value.ifBlank { null }
         )
     }
 
     fun loadUserById(userId: String): UserProfile? {
-        // TODO (Week 10): Call GET /users/{id} with Retrofit
         return FakeMediaRepository.followers.find { it.id == userId }
             ?: FakeMediaRepository.following.find { it.id == userId }
     }

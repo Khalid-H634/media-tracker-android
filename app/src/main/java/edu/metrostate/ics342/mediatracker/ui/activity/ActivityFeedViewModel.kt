@@ -13,7 +13,6 @@ class ActivityFeedViewModel : ViewModel() {
     val feedItems: StateFlow<List<ActivityEvent>> = _feedItems.asStateFlow()
 
     init {
-        // Load the five hardcoded events from the fake repository
         _feedItems.value = FakeMediaRepository.activityFeed
     }
 }
