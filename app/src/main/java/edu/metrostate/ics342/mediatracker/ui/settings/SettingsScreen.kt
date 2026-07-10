@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Lock
@@ -27,15 +26,17 @@ fun SettingsScreen(
     if (signOutDialogVisible) {
         AlertDialog(
             onDismissRequest = { signOutDialogVisible = false },
-            title            = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_sign_out_confirm_title)) },
-            text             = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_sign_out_confirm_message)) },
-            confirmButton    = {
+            title = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_sign_out_confirm_title)) },
+            text = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_sign_out_confirm_message)) },
+            confirmButton = {
                 TextButton(onClick = { signOutDialogVisible = false; onSignOut() }) {
                     Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_sign_out_button), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { signOutDialogVisible = false }) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_cancel_button)) }
+                TextButton(onClick = { signOutDialogVisible = false }) {
+                    Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_cancel_button))
+                }
             }
         )
     }
@@ -49,13 +50,16 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 8.dp)
         ) {
-            // ── Account section ────────────────────────────────────────────────
             SectionHeader(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_section_account))
 
             ListItem(
-                headlineContent   = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_email_label)) },
-                supportingContent = { Text(FakeMediaRepository.currentUser.email,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                headlineContent = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_email_label)) },
+                supportingContent = {
+                    Text(
+                        FakeMediaRepository.currentUser.email,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
@@ -70,14 +74,13 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // ── App section ────────────────────────────────────────────────────
             SectionHeader(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_section_app))
 
             ListItem(
-                headlineContent  = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_dark_mode)) },
-                trailingContent  = {
+                headlineContent = { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.settings_dark_mode)) },
+                trailingContent = {
                     Switch(
-                        checked         = darkModeEnabled,
+                        checked = darkModeEnabled,
                         onCheckedChange = { darkModeEnabled = it }
                     )
                 },
@@ -88,16 +91,15 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ── Sign out ───────────────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
                 OutlinedButton(
-                    onClick  = { signOutDialogVisible = true },
+                    onClick = { signOutDialogVisible = true },
                     modifier = Modifier.fillMaxWidth(),
-                    colors   = ButtonDefaults.outlinedButtonColors(
+                    colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
@@ -113,9 +115,9 @@ fun SettingsScreen(
 @Composable
 private fun SectionHeader(title: String) {
     Text(
-        text     = title,
-        style    = MaterialTheme.typography.labelLarge,
-        color    = MaterialTheme.colorScheme.primary,
+        text = title,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     )
 }

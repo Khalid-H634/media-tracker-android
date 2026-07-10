@@ -36,16 +36,17 @@ fun ConnectionsScreen(
             tabs.forEachIndexed { index, titleRes ->
                 Tab(
                     selected = selectedTab == index,
-                    onClick  = { selectedTab = index },
-                    text     = { Text(stringResource(titleRes)) }
+                    onClick = { selectedTab = index },
+                    text = { Text(stringResource(titleRes)) }
                 )
             }
         }
 
-        val users = if (selectedTab == 0)
+        val users = if (selectedTab == 0) {
             FakeMediaRepository.followers
-        else
+        } else {
             FakeMediaRepository.following
+        }
 
         if (users.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -59,9 +60,9 @@ fun ConnectionsScreen(
             LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                 items(users, key = { it.id }) { user ->
                     UserRow(
-                        user       = user,
-                        onClick    = { onUserClick(user.id) },
-                        isFollowing = selectedTab == 0 // simplified — real state comes from API
+                        user = user,
+                        onClick = { onUserClick(user.id) },
+                        isFollowing = selectedTab == 0
                     )
                 }
             }
@@ -84,21 +85,28 @@ private fun UserRow(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Avatar
         Box(
             modifier = Modifier.size(44.dp).clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
             if (user.avatarUrl != null) {
-                AsyncImage(model = user.avatarUrl, contentDescription = user.displayName,
-                    contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                AsyncImage(
+                    model = user.avatarUrl,
+                    contentDescription = user.displayName,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
             } else {
-                Surface(color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.fillMaxSize()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(user.displayName.firstOrNull()?.toString() ?: "?",
+                        Text(
+                            user.displayName.firstOrNull()?.toString() ?: "?",
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     }
                 }
             }
@@ -107,26 +115,40 @@ private fun UserRow(
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(user.displayName, style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold)
-            Text("@${user.username}", style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                user.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                "@${user.username}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
-        // Follow / Following toggle
-        // Week 11: Wire to POST /followers/{userId} and DELETE /followers/{userId}
         if (following) {
             OutlinedButton(
-                onClick  = { following = false },
+                onClick = { following = false },
                 modifier = Modifier.height(32.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-            ) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_following), style = MaterialTheme.typography.labelMedium) }
+            ) {
+                Text(
+                    stringResource(edu.metrostate.ics342.mediatracker.R.string.action_following),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         } else {
             Button(
-                onClick  = { following = true },
+                onClick = { following = true },
                 modifier = Modifier.height(32.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-            ) { Text(stringResource(edu.metrostate.ics342.mediatracker.R.string.action_follow), style = MaterialTheme.typography.labelMedium) }
+            ) {
+                Text(
+                    stringResource(edu.metrostate.ics342.mediatracker.R.string.action_follow),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         }
     }
 }

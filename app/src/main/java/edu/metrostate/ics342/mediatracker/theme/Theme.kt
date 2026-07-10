@@ -12,11 +12,17 @@ import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
     primary = Primary,
+    onPrimary = OnPrimary,
     primaryContainer = PrimaryContainer,
     onPrimaryContainer = OnPrimaryContainer,
     secondary = Secondary,
+    onSecondary = OnSecondary,
     secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
     tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = OnTertiaryContainer,
     background = Background,
     onBackground = OnBackground,
     surface = Surface,
@@ -27,13 +33,13 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary             = DarkPrimary,
-    onPrimary           = DarkOnPrimary,
-    primaryContainer    = DarkPrimaryContainer,
-    onPrimaryContainer  = DarkOnPrimaryContainer,
-    background          = DarkBackground,
-    surface             = DarkSurface,
-    onSurface           = DarkOnSurface,
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = DarkOnPrimaryContainer,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
 )
 
 @Composable
@@ -51,7 +57,7 @@ fun MediaTrackerTheme(
     }
     MaterialTheme(
         colorScheme = colorScheme,
-        typography  = Typography,
-        content     = content
+        typography = Typography,
+        content = content
     )
 }

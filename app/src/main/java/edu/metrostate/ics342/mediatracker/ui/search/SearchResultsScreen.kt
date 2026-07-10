@@ -3,7 +3,6 @@ package edu.metrostate.ics342.mediatracker.ui.search
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -16,37 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.metrostate.ics342.mediatracker.R
-
+import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
+import edu.metrostate.ics342.mediatracker.data.model.Media
+import androidx.compose.foundation.shape.RoundedCornerShape
 @Composable
 fun SearchResultsScreen(
     initialQuery: String,
     onBack: () -> Unit,
-    onMediaClick: (Int) -> Unit,
-    viewModel: SearchResultsViewModel = viewModel()
+    onMediaClick: (Int) -> Unit
 ) {
     var searchBarQuery by remember { mutableStateOf(initialQuery) }
-    val results by viewModel.results.collectAsState()
-    val selectedType by viewModel.selectedType.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-
-    val listState = rememberLazyListState()
-
-    // Trigger next page load when within 5 items of the end
-    val reachedBottom by remember {
-        derivedStateOf {
-            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
-            val total = listState.layoutInfo.totalItemsCount
-            total > 0 && lastVisible >= total - 5
-        }
-    }
-    LaunchedEffect(reachedBottom) {
-        if (reachedBottom) viewModel.loadNextPage()
-    }
+    val results = remember { mutableStateListOf<Media>() }
+    var selectedType by remember { mutableStateOf("") }
 
     LaunchedEffect(initialQuery) {
-        viewModel.search(initialQuery)
+        results.clear()
+        results.addAll(FakeMediaRepository.mediaList)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -69,16 +54,32 @@ fun SearchResultsScreen(
                 placeholder = { Text(stringResource(R.string.search_hint)) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
+                shape = RoundedCornerShape(28.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = {
-                    viewModel.search(searchBarQuery)
+                    val query = searchBarQuery.lowercase()
+                    results.clear()
+                    results.addAll(
+                        FakeMediaRepository.mediaList
+                            .filter { it.title.lowercase().contains(query) }
+                    )
                 })
             )
         }
 
         MediaTypeFilterChips(
             selectedType = selectedType,
-            onTypeSelect = viewModel::onTypeSelect,
+            onTypeSelect = { type ->
+                selectedType = type
+                results.clear()
+                results.addAll(
+                    FakeMediaRepository.mediaList
+                        .filter { type.isEmpty() || it.mediaType == type }
+                )
+            },
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -90,7 +91,6 @@ fun SearchResultsScreen(
         )
 
         LazyColumn(
-            state = listState,
             modifier = Modifier.fillMaxSize()
         ) {
             items(results, key = { it.id }) { media ->
@@ -98,18 +98,6 @@ fun SearchResultsScreen(
                     media = media,
                     onClick = { onMediaClick(media.id) }
                 )
-            }
-            if (isLoading) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
             }
         }
     }
