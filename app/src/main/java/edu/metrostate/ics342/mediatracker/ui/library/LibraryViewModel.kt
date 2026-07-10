@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class LibraryViewModel : ViewModel() {
 
@@ -21,8 +23,12 @@ class LibraryViewModel : ViewModel() {
     }
 
     fun loadLibrary() {
-        _libraryItems.value = FakeMediaRepository.libraryItems
-        _isLoading.value = false
+        GlobalScope.launch {
+            _isLoading.value = true
+            Thread.sleep(800)
+            _libraryItems.value = FakeMediaRepository.libraryItems
+            _isLoading.value = false
+        }
     }
 
     fun removeItem(mediaId: Int) {

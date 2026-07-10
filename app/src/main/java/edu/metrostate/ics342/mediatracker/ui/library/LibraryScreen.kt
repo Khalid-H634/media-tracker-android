@@ -226,7 +226,6 @@ private fun LibraryItemCard(
                 )
                 Spacer(Modifier.height(6.dp))
 
-                // StatusBadge - clickable to change status
                 StatusBadge(
                     status = item.status,
                     modifier = Modifier.clickable { statusDialogVisible = true }
