@@ -1,67 +1,118 @@
-# Week {{n}} Reflection
+# Week 10 Reflection
 
-**Name:**
-**Date:**
+**Name:** Khalid Hassan
+**Date:** 07-23-2026
 
 ---
 
 ## Commits This Week
 
-<!-- Paste a link to your commits for this week. The easiest way: go to your repo on GitHub,
-     click "commits", and copy the URL after filtering by your name or branch. -->
 
-**Link:**
+
+**Link:** https://github.com/Khalid-H634/media-tracker-android/pull/9
 
 ---
 
 ## Code Review
 
-<!-- Every week you leave a review on a pod mate's pull request. Fill in both parts below.
-     Part 1 is the link — I will verify the review exists on GitHub.
-     Part 2 is your written assessment — what you actually looked at and what you found. -->
+
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
 
+Hunter Bammert-Mueller:
+
+https://github.com/Hunterbounty11/media-tracker-android/pull/9/changes/abed0d9a59b168fbeae98e5e460f5c057902576f#r3642650597
+
+Danny King:
+
+https://github.com/DannyKin/media-tracker-android/pull/9/changes/7bb0320b9e37e8cfd5438775675a3ccadd925da2#r3642721038
+
 ### What I Looked At
 
-<!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
-     functions did you focus on? -->
+I looked at the MediaDetailViewModel, LibraryViewModel, LibraryScreen, and DefaultMediaRepository 
+files. I focused on how both pod mates implemented the optimistic update pattern for adding to 
+library, removing items, and toggling favorites.
 
 ### What I Noticed
 
-<!-- Be specific. Did you spot a potential bug? A pattern that could cause problems? Something
-     done well that you want to call out? "I looked at the ViewModel and everything seemed fine"
-     is not specific enough. Name the thing you noticed and explain why it matters. -->
+For Hunter's code, I noticed in the addFavorite() function (lines 42-55), there's no error handling
+to show the user if something fails. In the addToLibrary() function (lines 77-93), the libraryStatus
+only updates after the API succeeds instead of updating immediately, so the button text doesn't 
+change until the network request completes.
+
+For Danny's code, I noticed his removeItem() function (lines 51-69) follows the optimistic pattern 
+perfectly - the item disappears instantly, a backup is stored, the API call runs in the background,
+and rollback happens on failure. His updateStatus() function also updates instantly then rolls back.
+I also noticed he added error states in LibraryScreen (lines 91-101) so users see a message when 
+something fails.
 
 ### Comments I Left
+For Hunter: 
+LibraryViewModel.kt (line 12): "Should remove this import. It isn't used anyway in the 
+LibraryViewModel"
 
-<!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
-     say what it was. If you left a suggestion, say what you suggested and why. -->
+MediaDetailViewModel.kt (lines 42-55) addFavorite(): "should Add a _error StateFlow so you can 
+show a Snackbar when an add fails, and reset it when the user tries again."
 
----
+MediaDetailViewModel.kt (lines 77-93) addToLibrary(): "libraryStatus should update before the 
+API call so the button text changes instantly. Store the old status, update immediately, then roll
+back on failure."
+
+MediaDetailScreen.kt (lines 189-190): "Good use of the loading state pattern. The spinner gives 
+feedback while the background request completes."
+
+DefaultMediaRepository.kt: "Good job on the 409 conflicts. A 409 shouldn't trigger a rollback 
+since the item is already added."
+
+For Danny:
+
+LibraryViewModel.kt (lines 51-69) removeItem():"Nice work on the remove functionality. The 
+item is removed from the list immediately, with a backup stored and rollback logic in place if the 
+network call fails."
+
+LibraryScreen.kt (lines 91-101): "Good job showing the error state to the user. When it fails,
+the screen shows a message instead of just being blank."
+
 
 ## One Thing I Understood More Deeply
 
-<!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
-     what was confusing before, what made it make sense, and how you'd explain it to someone else.
-     There are no wrong answers here. -->
+I understood the update pattern much better after working through it. Update the UI first, make 
+the API call second, and roll back only if it fails. This makes the app feel instant and responsive.
 
----
+For my own code, I implemented this in several places. In addToLibrary(), I store the old status,
+update the button text immediately, then call the API. If it fails, I roll back and show an error. 
+For remove, the item disappears instantly, then the delete request runs in the background. If it
+fails, the item reappears.
+
+I also added the AuthInterceptor to handle authentication for all API requests. It adds the token 
+to each request header, except for login and registration, which skip it since they don't have 
+a token yet.
+
+For the library screen, I added loading, error, and empty states. A spinner shows while loading, 
+an error message with a retry appears on failure, and a message shows when the library is empty. 
+I also learned that 409 conflicts shouldn't trigger rollback since the item is already saved.
+
+
+
 
 ## One Thing I'm Still Confused About
 
-<!-- Be honest. This is the most useful part of the reflection for me — it tells me where to
-     spend more time in class. You will not lose points for being confused. -->
+I ran into an issue that was a 401 error earlier when trying to view the library feed because the
+tabs weren't loading anything. It turned out to be an authentication issue on my end. I had bypassed
+the login screen earlier and was trying to access the library without an authenticated session.
 
----
+The API needed a valid token for library requests. It kept rejecting because there was no token to 
+send. To fix it, I went back, registered an account, and logged in properly. The library started 
+loading correctly right away. Now that I'm logged in, the authentication token gets saved to the 
+session repository, and the AuthInterceptor successfully adds it to all the API requests.
+
+
 
 ## Anything Else *(optional)*
 
-<!-- Did you help a pod mate work through something? Did you discover something cool or frustrating?
-     Did something from a previous week finally click? This is a good place to put it. -->
 
----
+
 
 ## Rubric
 
