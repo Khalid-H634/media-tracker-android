@@ -7,6 +7,6 @@ data class LoginRequest(
     val grantType: String = "password",
     val email: String,
     val password: String,
-    val clientId: String,
-    val clientSecret: String
+    val clientId: String = ApiConstants.CLIENT_ID,
+    val clientSecret: String = ApiConstants.CLIENT_SECRET
 )

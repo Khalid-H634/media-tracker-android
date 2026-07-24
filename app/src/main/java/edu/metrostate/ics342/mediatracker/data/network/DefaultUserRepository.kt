@@ -21,11 +21,12 @@ class DefaultUserRepository(
                     email = email,
                     password = password,
                     username = username,
-                    displayName = displayName,
-                    clientId = ApiConstants.CLIENT_ID,
-                    clientSecret = ApiConstants.CLIENT_SECRET
+                    displayName = displayName
                 )
             )
+            android.util.Log.d("Register", "Response code: ${response.code()}")
+            android.util.Log.d("Register", "Error body: ${response.errorBody()?.string()}")
+
             when (response.code()) {
                 201 -> RegisterResult.Success
                 409 -> RegisterResult.Conflict
@@ -41,9 +42,7 @@ class DefaultUserRepository(
             val response = service.login(
                 LoginRequest(
                     email = email,
-                    password = password,
-                    clientId = ApiConstants.CLIENT_ID,
-                    clientSecret = ApiConstants.CLIENT_SECRET
+                    password = password
                 )
             )
             when (response.code()) {

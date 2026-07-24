@@ -33,9 +33,16 @@ fun LibraryScreen(
 ) {
     val items by viewModel.libraryItems.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     var selectedStatus by remember { mutableStateOf(LibraryStatus.WANT_TO) }
     var selectedType by remember { mutableStateOf("all") }
+
+
+
+    LaunchedEffect(Unit) {
+        viewModel.loadLibrary()
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(title = { Text(stringResource(R.string.library_title)) })
@@ -87,51 +94,69 @@ fun LibraryScreen(
 
         HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
 
-        if (isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+        when {
+            isLoading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-            return@Column
-        }
+            errorMessage != null -> {
+                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            errorMessage!!,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = { viewModel.refresh() }) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
+            else -> {
+                val filteredItems = items
+                    .filter { it.status == selectedStatus }
+                    .filter { selectedType == "all" || it.media.mediaType == selectedType }
 
-        val filteredItems = items
-            .filter { it.status == selectedStatus }
-            .filter { selectedType == "all" || it.media.mediaType == selectedType }
+                if (filteredItems.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            stringResource(R.string.library_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                    return@Column
+                }
 
-        if (filteredItems.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
                 Text(
-                    stringResource(R.string.library_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    if (filteredItems.size == 1) stringResource(R.string.library_item_count, filteredItems.size)
+                    else stringResource(R.string.library_items_count, filteredItems.size),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            return@Column
-        }
 
-        Text(
-            if (filteredItems.size == 1) stringResource(R.string.library_item_count, filteredItems.size)
-            else stringResource(R.string.library_items_count, filteredItems.size),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(filteredItems, key = { it.mediaId }) { item ->
-                LibraryItemCard(
-                    item = item,
-                    onClick = { onMediaClick(item.mediaId) },
-                    onRemove = { viewModel.removeItem(item.mediaId) },
-                    onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) }
-                )
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredItems, key = { it.mediaId }) { item ->
+                        LibraryItemCard(
+                            item = item,
+                            onClick = { onMediaClick(item.mediaId) },
+                            onRemove = { viewModel.removeItem(item.mediaId) },
+                            onStatusChange = { newStatus -> viewModel.updateStatus(item.mediaId, newStatus) }
+                        )
+                    }
+                }
             }
         }
     }

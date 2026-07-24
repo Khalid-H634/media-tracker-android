@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
@@ -29,11 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import edu.metrostate.ics342.mediatracker.R
+import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
 import edu.metrostate.ics342.mediatracker.data.model.Review
 import edu.metrostate.ics342.mediatracker.data.model.creatorCredit
 import edu.metrostate.ics342.mediatracker.theme.MovieContainer
 import edu.metrostate.ics342.mediatracker.theme.OnMovieContainer
+import edu.metrostate.ics342.mediatracker.ui.components.StatusBadge
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +48,8 @@ fun MediaDetailScreen(
     viewModel: MediaDetailViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isAddingToLibrary by viewModel.isAddingToLibrary.collectAsState()
+    val isFavoriting by viewModel.isFavoriting.collectAsState()
     val state = uiState
 
     LaunchedEffect(mediaId) {
@@ -74,6 +79,13 @@ fun MediaDetailScreen(
             MediaDetailContent(
                 detail = state.media,
                 reviews = state.reviews,
+                isInLibrary = state.isInLibrary,
+                libraryStatus = state.libraryStatus,
+                isFavorited = state.isFavorited,
+                isAddingToLibrary = isAddingToLibrary,
+                isFavoriting = isFavoriting,
+                onAddToLibrary = { viewModel.addToLibrary() },
+                onToggleFavorite = { viewModel.toggleFavorite() },
                 onNavigateBack = onNavigateBack,
                 onWriteReview = onWriteReview
             )
@@ -86,6 +98,13 @@ fun MediaDetailScreen(
 private fun MediaDetailContent(
     detail: MediaDetail,
     reviews: List<Review>,
+    isInLibrary: Boolean,
+    libraryStatus: LibraryStatus?,
+    isFavorited: Boolean,
+    isAddingToLibrary: Boolean,
+    isFavoriting: Boolean,
+    onAddToLibrary: () -> Unit,
+    onToggleFavorite: () -> Unit,
     onNavigateBack: () -> Unit,
     onWriteReview: (Int) -> Unit
 ) {
@@ -136,6 +155,13 @@ private fun MediaDetailContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
+
+
+                if (isInLibrary && libraryStatus != null) {
+                    Spacer(Modifier.height(6.dp))
+                    StatusBadge(status = libraryStatus)
+                }
+
                 Spacer(Modifier.height(8.dp))
                 RatingSummary(
                     averageRating = detail.averageRating,
@@ -145,31 +171,68 @@ private fun MediaDetailContent(
 
             Spacer(Modifier.height(20.dp))
 
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+
                 Button(
-                    onClick = { /* TODO: add to library */ },
-                    modifier = Modifier.weight(1f)
+                    onClick = onAddToLibrary,
+                    modifier = Modifier.weight(1f),
+                    enabled = !isAddingToLibrary
                 ) {
-                    Text(stringResource(R.string.detail_add_want_to))
+                    if (isAddingToLibrary) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(
+                            if (isInLibrary) {
+                                when (libraryStatus) {
+                                    LibraryStatus.WANT_TO -> "✓ Want To"
+                                    LibraryStatus.IN_PROGRESS -> "In Progress"
+                                    LibraryStatus.FINISHED -> "Finished"
+                                    else -> "In Library"
+                                }
+                            } else {
+                                stringResource(R.string.detail_add_want_to)
+                            }
+                        )
+                    }
                 }
+
+
                 OutlinedButton(
-                    onClick = { /* TODO: save */ },
-                    modifier = Modifier.weight(1f)
+                    onClick = onToggleFavorite,
+                    modifier = Modifier.weight(1f),
+                    enabled = !isFavoriting
                 ) {
-                    Icon(
-                        Icons.Outlined.FavoriteBorder,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.detail_save))
+                    if (isFavoriting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Icon(
+                            if (isFavorited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (isFavorited) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            if (isFavorited) "Saved" else stringResource(R.string.detail_save)
+                        )
+                    }
                 }
             }
 
             Spacer(Modifier.height(20.dp))
+
 
             if (!detail.description.isNullOrBlank()) {
                 SectionCaption(stringResource(R.string.detail_about))
@@ -217,6 +280,7 @@ private fun MediaDetailContent(
         }
     }
 }
+
 
 @Composable
 private fun MediaCover(detail: MediaDetail) {

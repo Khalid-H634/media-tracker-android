@@ -17,8 +17,7 @@ data class Media(
     val publishedYear: Int? = null,
     val averageRating: Float = 0f,
     val ratingCount: Int = 0,
-    val genres: List<String> = emptyList(),
-    val description: String? = null
+    val genres: List<String> = emptyList()
 )
 
 fun Media.creatorCredit(context: Context): String = when (mediaType) {
