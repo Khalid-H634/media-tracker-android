@@ -8,6 +8,6 @@ data class RegisterRequest(
     val password: String,
     val username: String,
     val displayName: String,
-    val clientId: String,
-    val clientSecret: String
+    val clientId: String = ApiConstants.CLIENT_ID,
+    val clientSecret: String = ApiConstants.CLIENT_SECRET
 )

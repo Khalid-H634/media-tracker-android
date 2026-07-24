@@ -22,8 +22,6 @@ class RegisterViewModel : ViewModel() {
         data class Error(val msgResId: Int) : RegisterUiState()
     }
 
-    // ── Form fields ───────────────────────────────────────────────────────
-
     private val _displayName = MutableStateFlow("")
     val displayName: StateFlow<String> = _displayName.asStateFlow()
 
@@ -39,12 +37,8 @@ class RegisterViewModel : ViewModel() {
     private val _confirmPassword = MutableStateFlow("")
     val confirmPassword: StateFlow<String> = _confirmPassword.asStateFlow()
 
-    // ── UI state ──────────────────────────────────────────────────────────
-
     private val _registerState = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
     val registerState: StateFlow<RegisterUiState> = _registerState.asStateFlow()
-
-    // ── Event handlers ────────────────────────────────────────────────────
 
     fun onDisplayNameChange(value: String) { _displayName.value = value }
     fun onEmailChange(value: String) { _email.value = value }
@@ -69,12 +63,19 @@ class RegisterViewModel : ViewModel() {
                 return@launch
             }
 
+            // Log what we're sending
+            android.util.Log.d("Register", "Email: ${_email.value}")
+            android.util.Log.d("Register", "Username: ${_username.value}")
+            android.util.Log.d("Register", "DisplayName: ${_displayName.value}")
+
             val result = userRepository.register(
                 email = _email.value,
                 password = _password.value,
                 username = _username.value,
                 displayName = _displayName.value
             )
+
+            android.util.Log.d("Register", "Result: $result")
 
             _registerState.value = when (result) {
                 RegisterResult.Success -> RegisterUiState.Success
