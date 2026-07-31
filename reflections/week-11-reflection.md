@@ -91,7 +91,23 @@ but the library API doesn't, and I'm not sure why.
 
 ## Anything Else *(optional)*
 
+## Bonus Feature Progress
 
+**What's working:**
+
+StarRatingRow composable. Tapping any star sets the rating to that value.
+POST /reviews sends { mediaId, rating, reviewText } to the API and returns a 201.
+Reviews list on Media Detail fetches GET /reviews?mediaId={id} and displays real data.
+
+**What's still stubbed, fake, or not started:**
+
+Edit (PUT /reviews/{id}) is not implemented yet.
+Delete (DELETE /reviews/{id}) is not implemented yet.
+Character counter is still basic but works.
+
+
+**What I'm blocked on, if anything:**
+Nothing major now, the basic flow works.
 
 ## Rubric
 
