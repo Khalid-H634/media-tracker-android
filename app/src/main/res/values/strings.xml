@@ -120,4 +120,13 @@
     <string name="detail_runtime_minutes">%d min</string>
     <string name="detail_stat_seasons">Seasons</string>
     <string name="detail_stat_genre">Genre</string>
+    <string name="write_review_title">Write a Review</string>
+    <string name="write_review_rating_label">Your Rating</string>
+    <string name="write_review_rating_hint">Tap a star to rate</string>
+    <string name="write_review_rating_selected">You selected %d stars</string>
+    <string name="write_review_text_hint">Review (optional)</string>
+    <string name="write_review_text_placeholder">What did you think?</string>
+    <string name="write_review_share_to_feed">Share to activity feed</string>
+    <string name="write_review_submit">Post Review</string>
+    <string name="action_cancel">Cancel</string>
 </resources>
