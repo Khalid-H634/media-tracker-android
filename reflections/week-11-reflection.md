@@ -1,67 +1,97 @@
-# Week {{n}} Reflection
+# Week 11 Reflection
 
-**Name:** 
-**Date:**
+**Name:** Khalid Hassan
+**Date:** 07-30-2026
 
 ---
 
 ## Commits This Week
 
-<!-- Paste a link to your commits for this week. The easiest way: go to your repo on GitHub,
-     click "commits", and copy the URL after filtering by your name or branch. -->
 
-**Link:**
+**Link:** https://github.com/Khalid-H634/media-tracker-android/pull/10
 
 ---
 
 ## Code Review
 
-<!-- Every week you leave a review on a pod mate's pull request. Fill in both parts below.
-     Part 1 is the link — I will verify the review exists on GitHub.
-     Part 2 is your written assessment — what you actually looked at and what you found. -->
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
 
+Hunter Bammert-Mueller:
+
+https://github.com/Hunterbounty11/media-tracker-android/pull/10/changes/734f92d7764d62c5f81a0fc7259a58dd777d16ba#r3688179686
+
+Danny King:
+
+https://github.com/DannyKin/media-tracker-android/pull/10/changes/95ff10639ea85a01be5c3705f29de292a08fc0fa#r3688109060
+
+
 ### What I Looked At
 
-<!-- Walk through the code you reviewed. What was the PR trying to do? Which files or
-     functions did you focus on? -->
+Hunter: I reviewed MediaApiService.kt and PrioritiesViewModel.kt from his Priorities feature. I 
+focused on the API endpoints and how the ViewModel loads data.
 
+Danny: I reviewed Quote.kt, MediaDetailViewModel.kt, and QuotesScreen.kt from his Quotes feature. I 
+focused on the data model, the save function, and the screen loading logic.
 ### What I Noticed
 
-<!-- Be specific. Did you spot a potential bug? A pattern that could cause problems? Something
-     done well that you want to call out? "I looked at the ViewModel and everything seemed fine"
-     is not specific enough. Name the thing you noticed and explain why it matters. -->
+Hunter: 
+In MediaApiService.kt, the priorities endpoints are set up correctly with GET to fetch the list and
+PUT to update. In PrioritiesViewModel.kt (lines 28-31), loadPriorities() uses viewModelScope in the 
+init block to load priorities when the screen opens, with a try/catch to prevent crashes if 
+the network fails.
+
+Danny:
+The Quote data model and API endpoints in Quote.kt and MediaApiService.kt are complete and match the 
+server contract. In MediaDetailViewModel.kt, the saveQuote() function uses viewModelScope for the 
+createQuote call, which stops the network request if the user leaves the screen. The try/catch 
+lets the user know if the quote saved or not.
+
+One issue I noticed: in QuotesScreen.kt, loadQuotes() is defined but never called, so the screen
+stays empty.
 
 ### Comments I Left
 
-<!-- Briefly summarize the comments you left on the PR. If you left a positive comment,
-     say what it was. If you left a suggestion, say what you suggested and why. -->
+Hunter: 
+Pointed out that the priorities endpoints are set up correctly (GET and PUT)
+Noted the good use of viewModelScope in the init block and the try/catch for error handling
 
----
+Danny:
+
+Noted the data model and API endpoints are complete.
+Pointed out the good use of viewModelScope for saveQuote() and the try/catch for user feedback
+Asked why loadQuotes() is never called and suggested using LaunchedEffect to load data when the 
+screen opens
 
 ## One Thing I Understood More Deeply
 
-<!-- Be specific. Don't write "I learned about ViewModels." Write what specifically clicked —
-     what was confusing before, what made it make sense, and how you'd explain it to someone else.
-     There are no wrong answers here. -->
+The Write Review feature. At first, I didn't understand how to connect the UI to the API. I had to 
+build the ReviewApiService interface with GET and POST endpoints, add it to RetrofitInstance, and 
+then update MediaDetailViewModel to fetch real reviews instead of fake ones.
 
----
+What finally clicked was the flow: WriteReviewScreen collects state from WriteReviewViewModel
+
+When the user taps "Post Review," viewModel.submitReview(mediaId) is called. This creates a 
+CreateReviewRequest and calls RetrofitInstance.reviewApiService.createReview()
+On success, the ViewModel emits SubmitState.Success and the screen navigates back. Back on 
+MediaDetailScreen, MediaDetailViewModel calls GET /reviews and displays the updated list
+
+I struggled with the Retrofit converter errors at first. The server was returning an empty array [] 
+but my code expected an object {"reviews": []}. Once I switched back to Response<List<Review>> 
+and handled the empty list case, it worked. screen opens
 
 ## One Thing I'm Still Confused About
 
-<!-- Be honest. This is the most useful part of the reflection for me — it tells me where to
-     spend more time in class. You will not lose points for being confused. -->
-
----
+For the "Want To" button. When I click it, the button doesn't show that the item was added to my 
+library. I'm using real media IDs from the search results, but the API call might be failing. 
+I added logging but still need to check the response code. I think it might be a 401 token 
+issue, or the media ID doesn't exist in the library table on the server. The review API works,
+but the library API doesn't, and I'm not sure why.
 
 ## Anything Else *(optional)*
 
-<!-- Did you help a pod mate work through something? Did you discover something cool or frustrating?
-     Did something from a previous week finally click? This is a good place to put it. -->
 
----
 
 ## Rubric
 
