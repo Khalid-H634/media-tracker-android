@@ -41,4 +41,6 @@ object RetrofitInstance {
     val mediaApiService: MediaApiService by lazy { retrofit.create(MediaApiService::class.java) }
     val libraryApiService: LibraryApiService by lazy { retrofit.create(LibraryApiService::class.java) }
     val favoritesApiService: FavoritesApiService by lazy { retrofit.create(FavoritesApiService::class.java) }
+    val reviewApiService: ReviewApiService by lazy { retrofit.create(ReviewApiService::class.java)
+    }
 }

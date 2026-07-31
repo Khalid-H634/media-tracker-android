@@ -2,7 +2,6 @@ package edu.metrostate.ics342.mediatracker.ui.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.metrostate.ics342.mediatracker.data.FakeMediaRepository
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
 import edu.metrostate.ics342.mediatracker.data.model.MediaDetail
 import edu.metrostate.ics342.mediatracker.data.model.Review
@@ -50,7 +49,43 @@ class MediaDetailViewModel : ViewModel() {
             _uiState.value = MediaDetailUiState.Loading
 
             try {
-                val media = FakeMediaRepository.sampleMediaDetail
+
+                val mediaResponse = RetrofitInstance.mediaApiService.getMediaById(mediaId)
+
+                if (!mediaResponse.isSuccessful) {
+                    _uiState.value = MediaDetailUiState.Error("Failed to load media: ${mediaResponse.code()}")
+                    return@launch
+                }
+
+                val media = mediaResponse.body()
+                if (media == null) {
+                    _uiState.value = MediaDetailUiState.Error("Media not found")
+                    return@launch
+                }
+
+
+                val mediaDetail = MediaDetail(
+                    id = media.id,
+                    mediaType = media.mediaType,
+                    title = media.title,
+                    author = media.author,
+                    director = media.director,
+                    creator = media.creator,
+                    network = media.network,
+                    coverUrl = media.coverUrl,
+                    publishedYear = media.publishedYear,
+                    averageRating = media.averageRating,
+                    ratingCount = media.ratingCount,
+                    genres = media.genres,
+                    description = null,
+                    pageCount = null,
+                    runtimeMinutes = null,
+                    seasonCount = null,
+                    episodeCount = null,
+                    isbn = null,
+                    reviewCount = 0
+                )
+
 
                 var isInLibrary = false
                 var libraryStatus: LibraryStatus? = null
@@ -63,8 +98,9 @@ class MediaDetailViewModel : ViewModel() {
                         }
                     }
                 } catch (e: Exception) {
-                    // 404 means not in library
+
                 }
+
 
                 var isFavorited = false
                 try {
@@ -73,18 +109,31 @@ class MediaDetailViewModel : ViewModel() {
                         isFavorited = true
                     }
                 } catch (e: Exception) {
-                    // 404 means not favorited
+
                 }
 
+
+                val reviewsResponse = RetrofitInstance.reviewApiService.getReviews(mediaId)
+                android.util.Log.d("REVIEWS", "Code: ${reviewsResponse.code()}")
+                android.util.Log.d("REVIEWS", "Body: ${reviewsResponse.body()}")
+
+                val reviews = if (reviewsResponse.isSuccessful) {
+                    reviewsResponse.body() ?: emptyList()
+                } else {
+                    emptyList()
+                }
+                android.util.Log.d("REVIEWS", "Count: ${reviews.size}")
+
                 _uiState.value = MediaDetailUiState.Success(
-                    media = media,
-                    reviews = emptyList(),
+                    media = mediaDetail,
+                    reviews = reviews,
                     isInLibrary = isInLibrary,
                     libraryStatus = libraryStatus,
                     isFavorited = isFavorited
                 )
 
             } catch (e: Exception) {
+                android.util.Log.e("MEDIA_DETAIL", "Error: ${e.message}", e)
                 _uiState.value = MediaDetailUiState.Error("Error: ${e.message}")
             }
         }
@@ -110,7 +159,7 @@ class MediaDetailViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                // Handle error
+
             } finally {
                 _isAddingToLibrary.value = false
             }
@@ -138,7 +187,7 @@ class MediaDetailViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                // Handle error
+
             } finally {
                 _isFavoriting.value = false
             }
