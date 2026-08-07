@@ -16,7 +16,13 @@ class AuthInterceptor(
             return chain.proceed(originalRequest)
         }
 
-        val token = runBlocking { sessionRepository.getAccessToken() }
+        val token = runBlocking {
+            try {
+                sessionRepository.getAccessToken()
+            } catch (e: Exception) {
+                null
+            }
+        }
 
         return if (token != null) {
             val newRequest = originalRequest.newBuilder()

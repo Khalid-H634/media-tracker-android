@@ -36,27 +36,39 @@ import edu.metrostate.ics342.mediatracker.ui.components.StarRatingRow
 @Composable
 fun WriteReviewScreen(
     mediaId: Int,
+    reviewId: Int? = null,
     onNavigateBack: () -> Unit,
     viewModel: WriteReviewViewModel = viewModel()
 ) {
     val rating by viewModel.rating.collectAsState()
     val reviewText by viewModel.reviewText.collectAsState()
     val submitState by viewModel.submitState.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
-    val isLoading = submitState is WriteReviewViewModel.SubmitState.Loading
+    LaunchedEffect(reviewId) {
+        if (reviewId != null) {
+            viewModel.loadReview(reviewId)
+        }
+    }
+
     val isSuccess = submitState is WriteReviewViewModel.SubmitState.Success
-    val errorMsg = (submitState as? WriteReviewViewModel.SubmitState.Error)?.message
-
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
             onNavigateBack()
         }
     }
 
+    val errorMsg = (submitState as? WriteReviewViewModel.SubmitState.Error)?.message
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.write_review_title)) },
+                title = {
+                    Text(
+                        if (reviewId == null) stringResource(R.string.write_review_title)
+                        else "Edit Review"
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Text("Cancel")
@@ -83,30 +95,23 @@ fun WriteReviewScreen(
 
             StarRatingRow(
                 rating = rating,
-                onRatingChange = viewModel::onRatingChange,
+                onRatingChange = { newRating -> viewModel.onRatingChange(newRating) },
                 starSize = 40
             )
 
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = if (rating == 0) {
-                    "Tap a star to rate"
-                } else {
-                    "You selected $rating stars"
-                },
+                text = if (rating == 0) "Tap a star to rate" else "You selected $rating stars",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (rating == 0) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                color = if (rating == 0) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             OutlinedTextField(
                 value = reviewText,
-                onValueChange = viewModel::onReviewTextChange,
+                onValueChange = { newText -> viewModel.onReviewTextChange(newText) },
                 label = { Text("Review (optional)") },
                 placeholder = { Text("What did you think?") },
                 modifier = Modifier.fillMaxWidth(),
@@ -116,11 +121,8 @@ fun WriteReviewScreen(
                 supportingText = {
                     Text(
                         text = "${reviewText.length}/500",
-                        color = if (reviewText.length > 500) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                        color = if (reviewText.length > 500) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 isError = reviewText.length > 500
@@ -138,7 +140,9 @@ fun WriteReviewScreen(
             }
 
             Button(
-                onClick = { viewModel.submitReview(mediaId) },
+                onClick = {
+                    viewModel.submitReview(mediaId, reviewId)
+                },
                 enabled = rating > 0 && reviewText.length <= 500 && !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -151,7 +155,7 @@ fun WriteReviewScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Post Review")
+                    Text(if (reviewId == null) "Post Review" else "Update Review")
                 }
             }
         }

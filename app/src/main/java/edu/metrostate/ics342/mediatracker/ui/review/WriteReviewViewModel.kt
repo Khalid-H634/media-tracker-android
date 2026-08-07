@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.metrostate.ics342.mediatracker.data.network.CreateReviewRequest
 import edu.metrostate.ics342.mediatracker.data.network.RetrofitInstance
+import edu.metrostate.ics342.mediatracker.data.network.UpdateReviewRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,15 +22,25 @@ class WriteReviewViewModel : ViewModel() {
     private val _shareToFeed = MutableStateFlow(true)
     val shareToFeed: StateFlow<Boolean> = _shareToFeed.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     sealed class SubmitState {
         data object Idle : SubmitState()
-        data object Loading : SubmitState()
         data object Success : SubmitState()
         data class Error(val message: String) : SubmitState()
     }
 
     private val _submitState = MutableStateFlow<SubmitState>(SubmitState.Idle)
     val submitState: StateFlow<SubmitState> = _submitState.asStateFlow()
+
+    fun loadReview(reviewId: Int) {
+    }
+
+    fun setReviewData(rating: Int, reviewText: String) {
+        _rating.value = rating
+        _reviewText.value = reviewText
+    }
 
     fun onRatingChange(value: Int) {
         _rating.value = value
@@ -46,41 +57,46 @@ class WriteReviewViewModel : ViewModel() {
         resetSubmitState()
     }
 
-    fun submitReview(mediaId: Int) {
+    fun submitReview(mediaId: Int, reviewId: Int? = null) {
         if (_rating.value == 0) {
             _submitState.value = SubmitState.Error("Please select a rating")
             return
         }
-
         if (_reviewText.value.length > 500) {
-            _submitState.value = SubmitState.Error("Review text must be 500 characters or less")
+            _submitState.value = SubmitState.Error("Review must be 500 characters or less")
             return
         }
 
         viewModelScope.launch {
-            _submitState.value = SubmitState.Loading
+            _isLoading.value = true
+            _submitState.value = SubmitState.Idle
 
             try {
-                val request = CreateReviewRequest(
-                    mediaId = mediaId,
-                    rating = _rating.value,
-                    reviewText = _reviewText.value.ifBlank { null },
-                    shareToFeed = if (_shareToFeed.value) true else null
-                )
-
-                val response = RetrofitInstance.reviewApiService.createReview(request)
+                val response = if (reviewId == null) {
+                    val request = CreateReviewRequest(
+                        mediaId = mediaId,
+                        rating = _rating.value,
+                        reviewText = _reviewText.value.ifBlank { null },
+                        shareToFeed = if (_shareToFeed.value) true else null
+                    )
+                    RetrofitInstance.reviewApiService.createReview(request)
+                } else {
+                    val request = UpdateReviewRequest(
+                        rating = _rating.value,
+                        reviewText = _reviewText.value.ifBlank { null },
+                        shareToFeed = if (_shareToFeed.value) true else null
+                    )
+                    RetrofitInstance.reviewApiService.updateReview(reviewId, request)
+                }
 
                 when (response.code()) {
-                    200, 201 -> {
-                        _submitState.value = SubmitState.Success
-                    }
-                    409 -> {
-                        _submitState.value = SubmitState.Error("You've already reviewed this item")
-                    }
+                    200, 201 -> _submitState.value = SubmitState.Success
+                    409 -> _submitState.value = SubmitState.Error("You've already reviewed this item")
                     else -> {
                         val errorBody = response.errorBody()?.string()
                         _submitState.value = SubmitState.Error(
-                            errorBody?.let { "Server error: $it" } ?: "Failed to submit review (${response.code()})"
+                            errorBody?.let { "Server error: $it" }
+                                ?: "Failed to submit (${response.code()})"
                         )
                     }
                 }
@@ -88,12 +104,14 @@ class WriteReviewViewModel : ViewModel() {
                 _submitState.value = SubmitState.Error("Network error: ${e.message}")
             } catch (e: Exception) {
                 _submitState.value = SubmitState.Error("Unexpected error: ${e.message}")
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     private fun resetSubmitState() {
-        if (_submitState.value !is SubmitState.Loading) {
+        if (_submitState.value !is SubmitState.Success) {
             _submitState.value = SubmitState.Idle
         }
     }
