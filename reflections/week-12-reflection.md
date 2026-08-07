@@ -4,10 +4,10 @@
 **Date:** 08-06-2026
 
 ---
-**My assigned bonus feature:** *(Write Review / Quotes / Priorities)* 
+**My assigned bonus feature:** *(Write Review / Quotes / Priorities)*
 
 Review
-        
+
 ## Commits This Week
 
 
@@ -22,26 +22,26 @@ Review
 
 **Reviewed:** *(pod mate's name)*
 **Link to my review:**
-        Hunter Bammert-Mueller:
+Hunter Bammert-Mueller:
 https://github.com/Hunterbounty11/media-tracker-android/pull/11/changes/7edca19aa5151c1f0e1145d6d36ed27fbfb15bf8#r3733547304
 
 
 ### What I Looked At
-I reviewed Hunter's Priorities feature implementation, specifically PriorityScreen.kt, 
-PriorityViewModel.kt, and the integration with LibraryScreen.kt. I focused on the drag-and-drop 
+I reviewed Hunter's Priorities feature implementation, specifically PriorityScreen.kt,
+PriorityViewModel.kt, and the integration with LibraryScreen.kt. I focused on the drag-and-drop
 reordering, error handling, and priority limit logic.
 
 ### What I Noticed
 The drag and drop uses graphicsLayer for smooth animation without recomposition. The MAX_PRIORITIES
-= 5 limit is enforced on both UI and ViewModel layers. Error messages are user friendly and stale 
+= 5 limit is enforced on both UI and ViewModel layers. Error messages are user friendly and stale
 states are properly cleared.
 
 
 ### Comments I Left
-PriorityScreen.kt (Lines 46-49): "Good use of LaunchedEffect with errorMessage as the key. The 
+PriorityScreen.kt (Lines 46-49): "Good use of LaunchedEffect with errorMessage as the key. The
 Snackbar only shows when the error changes, and onDismissError() prevents duplicate messages."
 
-PriorityViewModel.kt (Lines 36-44): "The error message is user-friendly and actionable. Clearing 
+PriorityViewModel.kt (Lines 36-44): "The error message is user-friendly and actionable. Clearing
 the error state before loading prevents stale messages."
 
 
@@ -74,15 +74,15 @@ Edit screen relies on navigation arguments since there's no GET /reviews/{id} en
      actually shifted in how you think about building a feature from scratch, start to finish? -->
 
 Building the feature from scratch in the last two weeks taught me to think about it end to end.
-I started with just the form and POST, then added edit, delete, and all the edge cases: network 
-failures, duplicate submissions, and navigation issues not just making the happy path work. 
+I started with just the form and POST, then added edit, delete, and all the edge cases: network
+failures, duplicate submissions, and navigation issues not just making the happy path work.
 The optimistic delete pattern (removing immediately/reverting on failure) made the app feel faster.
 
 ## One Thing I'm Still Confused About
 This week I ran into a navigation crash: "navigation destination login is not a direct child of this
 NavGraph." I fixed it by updating startDestination from Routes.LOGIN to
-"${Routes.LOGIN}?registered=false" so the route matched the composable pattern. I understand the 
-fix, but I'm still confused about how optional navigation parameters work with startDestination 
+"${Routes.LOGIN}?registered=false" so the route matched the composable pattern. I understand the
+fix, but I'm still confused about how optional navigation parameters work with startDestination
 and want to understand this better.
 
 
