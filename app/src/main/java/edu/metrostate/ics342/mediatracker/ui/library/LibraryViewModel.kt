@@ -1,78 +1,60 @@
 package edu.metrostate.ics342.mediatracker.ui.library
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import edu.metrostate.ics342.mediatracker.data.datastore.DefaultSessionRepository
 import edu.metrostate.ics342.mediatracker.data.model.LibraryItem
 import edu.metrostate.ics342.mediatracker.data.model.LibraryStatus
-import edu.metrostate.ics342.mediatracker.data.network.LibraryItemResponse
-import edu.metrostate.ics342.mediatracker.data.network.RetrofitInstance
-import edu.metrostate.ics342.mediatracker.data.network.toLibraryItem
+import edu.metrostate.ics342.mediatracker.data.network.DefaultMediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LibraryViewModel : ViewModel() {
+sealed interface LibraryUiState {
+    data object Loading : LibraryUiState
+    data class Error(val message: String) : LibraryUiState
+    data class Success(val items: List<LibraryItem>) : LibraryUiState
+}
 
-    private val _libraryItems = MutableStateFlow<List<LibraryItem>>(emptyList())
-    val libraryItems: StateFlow<List<LibraryItem>> = _libraryItems.asStateFlow()
+class LibraryViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val repository = DefaultMediaRepository(DefaultSessionRepository(application))
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _uiState = MutableStateFlow<LibraryUiState>(LibraryUiState.Loading)
+    val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
+
+    private var currentStatus = LibraryStatus.WANT_TO
 
     init {
-        loadLibrary()
+        loadLibrary(currentStatus)
     }
 
-    fun loadLibrary() {
+    fun loadLibrary(status: LibraryStatus) {
+        currentStatus = status
+        _uiState.value = LibraryUiState.Loading
         viewModelScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null
-
             try {
-                val response = RetrofitInstance.libraryApiService.getLibrary()
-
-                if (response.isSuccessful) {
-                    val items: List<LibraryItemResponse> = response.body() ?: emptyList()
-                    _libraryItems.value = items.map { it.toLibraryItem() }
-                } else {
-                    _errorMessage.value = "Failed to load library: ${response.code()}"
-                }
+                val page = repository.getLibrary(status)
+                _uiState.value = LibraryUiState.Success(page.items)
             } catch (e: Exception) {
-                _errorMessage.value = "Error: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                _uiState.value = LibraryUiState.Error(e.message ?: "Failed to load library")
             }
         }
     }
+
+    fun retry() = loadLibrary(currentStatus)
 
     fun removeItem(mediaId: Int) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstance.libraryApiService.removeFromLibrary(mediaId)
-                if (response.isSuccessful) {
-                    _libraryItems.value = _libraryItems.value.filter { it.mediaId != mediaId }
-                }
-            } catch (e: Exception) {
-
-            }
-        }
+        val current = _uiState.value as? LibraryUiState.Success ?: return
+        _uiState.value = current.copy(items = current.items.filter { it.mediaId != mediaId })
     }
 
     fun updateStatus(mediaId: Int, newStatus: LibraryStatus) {
-        _libraryItems.value = _libraryItems.value.map { item ->
-            if (item.mediaId == mediaId) {
-                item.copy(status = newStatus)
-            } else {
-                item
-            }
-        }
-    }
-
-    fun refresh() {
-        loadLibrary()
+        val current = _uiState.value as? LibraryUiState.Success ?: return
+        _uiState.value = current.copy(items = current.items.map { item ->
+            if (item.mediaId == mediaId) item.copy(status = newStatus) else item
+        })
     }
 }
