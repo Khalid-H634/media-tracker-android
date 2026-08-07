@@ -49,7 +49,7 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN,
+            startDestination = "${Routes.LOGIN}?registered=false",
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(
@@ -127,17 +127,37 @@ fun MediaTrackerNavGraph(navController: NavHostController) {
                 MediaDetailScreen(
                     mediaId = mediaId,
                     onNavigateBack = { navController.popBackStack() },
-                    onWriteReview = { id -> navController.navigate("write_review/$id") }
+                    onWriteReview = { id -> navController.navigate("write_review/$id") },
+                    onEditReview = { mediaId, review ->
+                        navController.navigate("write_review/$mediaId/${review.id}")
+                    }
                 )
             }
 
             composable(
-                route = Routes.WRITE_REVIEW,
+                route = "write_review/{mediaId}",
                 arguments = listOf(navArgument("mediaId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val mediaId = backStackEntry.arguments?.getInt("mediaId") ?: return@composable
                 WriteReviewScreen(
                     mediaId = mediaId,
+                    reviewId = null,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "write_review/{mediaId}/{reviewId}",
+                arguments = listOf(
+                    navArgument("mediaId") { type = NavType.IntType },
+                    navArgument("reviewId") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val mediaId = backStackEntry.arguments?.getInt("mediaId") ?: return@composable
+                val reviewId = backStackEntry.arguments?.getInt("reviewId") ?: return@composable
+                WriteReviewScreen(
+                    mediaId = mediaId,
+                    reviewId = reviewId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
