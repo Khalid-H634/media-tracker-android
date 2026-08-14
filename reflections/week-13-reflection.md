@@ -23,16 +23,16 @@ There is no page minimum. There is a quality minimum. A response that takes two 
 
 https://github.com/Khalid-H634/media-tracker-android/pull/7/commits
 
-This commit was when I understood how ViewModel and Screen connect.  I had to create the ViewModel 
-with StateFlow, add setMediaId(), and build loadMediaDetail(). After this, the screen actually 
+This commit was when I understood how ViewModel and Screen connect.  I had to create the ViewModel
+with StateFlow, add setMediaId(), and build loadMediaDetail(). After this, the screen actually
 showed real content. It taught me the core pattern we used all semester.
 
 **1b. Name one screen in your app that you think is genuinely well-built. Not perfect — well-built. Explain specifically why: what design decisions did you make, what did you refactor, and how does it differ from how you would have approached it in week 2?**
 
 > Your answer:
 
-The Write Review screen is well built. I separated UI from logic, the screen just collects state 
-and the ViewModel handles the API call. I also extracted StarRatingRow as a reusable component. 
+The Write Review screen is well built. I separated UI from logic, the screen just collects state
+and the ViewModel handles the API call. I also extracted StarRatingRow as a reusable component.
 In week 2, I would have put everything in one file. Now I understand why separation matters.
 
 **1c. Name one screen or feature that you are not satisfied with. What is wrong with it? If you had one more week, what specifically would you change?**
@@ -40,18 +40,18 @@ In week 2, I would have put everything in one file. Now I understand why separat
 > Your answer:
 
 The Profile screen still shows hardcoded data from FakeMediaRepository instead of real user data.
-If I had one more week, I would wire it to GET /users/me to show the actual logged in user's info 
+If I had one more week, I would wire it to GET /users/me to show the actual logged in user's info
 instead of "Alex Chen."
 
 ## Part 2 — A Specific Bug
 
-**2a. Describe the hardest bug you fixed this semester. Not the most recent one — the one that 
-took the longest or cost you the most confusion. What was the symptom? What did you think the 
+**2a. Describe the hardest bug you fixed this semester. Not the most recent one — the one that
+took the longest or cost you the most confusion. What was the symptom? What did you think the
 problem was at first? What was it actually? How did you find it?**
 
 > Your answer:
 
-The hardest bug was the Retrofit converter error when building Write Review. The app crashed with a 
+The hardest bug was the Retrofit converter error when building Write Review. The app crashed with a
 JSON parsing error. I thought my Review model was wrong. Actually, the server returned an empty
 array [] while my code expected an object {"reviews": []}. I found it by reading the error message
 and adding logging.
@@ -59,14 +59,14 @@ and adding logging.
 **2b. Copy and paste the specific lines of code you changed to fix it. (This can be a before/after comparison, a diff, or just the relevant snippet.) Explain in plain English what the fix does and why it works.**
 
 > Your answer (include code):
-> 
+>
 Before:
 suspend fun getReviews(...): Response<ReviewsResponse>
 
 After:
 suspend fun getReviews(...): Response<List<Review>>
 
-The fix changed the return type from a wrapper object to a direct list. The server returns a raw 
+The fix changed the return type from a wrapper object to a direct list. The server returns a raw
 array, not an object. Once I switched to List<Review>, it worked.
 
 
@@ -75,8 +75,8 @@ array, not an object. Once I switched to List<Review>, it worked.
 **3a. Pick the concept from this semester that took the longest to actually understand — not just to implement, but to understand. Describe what you thought it was before you understood it, what changed, and how you would explain it now to a student who was exactly where you were at the start of the semester.**
 
 > Your answer:
-> 
-StateFlow and collectAsState. What changed was when I saw the UI update automatically when the 
+>
+StateFlow and collectAsState. What changed was when I saw the UI update automatically when the
 StateFlow changed. In Week 7, when I built MediaDetailViewModel, I finally understood the pattern.
 The ViewModel broadcasts updates and the Screen listens for them. When new data comes in,
 the screen updates itself. Without collectAsState, the screen wouldn't know to refresh.
@@ -88,10 +88,10 @@ the screen updates itself. Without collectAsState, the screen wouldn't know to r
 
 > Your answer:
 
-I was confused about how RegisterScreen sends data to the ViewModel. I didn't understand how the 
-form inputs connected to the API call. It clicked in Week 5 when I traced the full flow: Screen 
-calls ViewModel, ViewModel calls Repository, Repository calls API service. I realized the 
-ViewModel holds the state and the screen just observes it and sends user actions up. I'm not 
+I was confused about how RegisterScreen sends data to the ViewModel. I didn't understand how the
+form inputs connected to the API call. It clicked in Week 5 when I traced the full flow: Screen
+calls ViewModel, ViewModel calls Repository, Repository calls API service. I realized the
+ViewModel holds the state and the screen just observes it and sends user actions up. I'm not
 confused about this anymore.
 
 
@@ -99,8 +99,8 @@ confused about this anymore.
 
 > Your answer:
 
-In Week 10, I accidentally committed my API client ID and secret in ApiConstants.kt.One of my pods 
-pointed it out saying "You committed your client Id and client secret". I always double check 
+In Week 10, I accidentally committed my API client ID and secret in ApiConstants.kt.One of my pods
+pointed it out saying "You committed your client Id and client secret". I always double check
 what I'm pushing and store credentials in BuildConfig.
 
 ## Part 4 — Your Bonus Feature
@@ -110,23 +110,23 @@ what I'm pushing and store credentials in BuildConfig.
 > Your answer:
 
 My bonus feature is Write Review. Users can rate and review movies, shows, or books. On any media
-detail page, there's a "Write a Review" button. You tap stars to give a rating from 1 to 5 and 
-optionally write text. When you submit, your review shows up on the page. Users want this to share 
+detail page, there's a "Write a Review" button. You tap stars to give a rating from 1 to 5 and
+optionally write text. When you submit, your review shows up on the page. Users want this to share
 their opinion and see what others thought.
 
 **4b. What was the technically hardest part of building it? Name a specific function, flow, or data structure that gave you trouble, and explain what the problem was.**
 
 > Your answer:
 
-The hardest part was wiring up POST /reviews and handling the Retrofit converter. I had to create 
-ReviewApiService, add it to RetrofitInstance, and call it from the ViewModel. The tricky part was 
+The hardest part was wiring up POST /reviews and handling the Retrofit converter. I had to create
+ReviewApiService, add it to RetrofitInstance, and call it from the ViewModel. The tricky part was
 the JSON structure — the server returned something different than I expected until I fixed the
 return type.
 
 **4c. Your bonus feature has tests. Open the test file and paste the test you think is most valuable — the one that would catch the most important failure. Explain what it proves and what it does not prove.**
 
 > Your answer (include code):
-> 
+>
 @Test
 fun starRatingRow_tappingFirstStarAfterFifth_lowersRating() {
 var rating = 5
@@ -151,7 +151,7 @@ saves to the server.
 
 > Your answer:
 
-I would build a custom list feature where users can create and organize media into lists like 
+I would build a custom list feature where users can create and organize media into lists like
 "Books to Read" or "Favorite Movies" beyond just the library status. It would let me
 practice complex data relationships and list management.
 
